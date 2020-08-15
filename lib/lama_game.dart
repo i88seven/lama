@@ -5,38 +5,26 @@ import 'package:flame/components/component.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-import 'package:lama/components/hand.dart';
+import 'package:lama/components/hands.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   final double squareSize = 128;
   bool running = true;
+  Hands hands;
+  Size screenSize;
 
   LamaGame() {
-    add(Hand()
-      ..x = 100
-      ..y = 100);
+    hands = Hands(this);
+  }
+
+  @override
+  void resize(Size size) {
+    super.resize(size);
+    this.screenSize = size;
   }
 
   @override
   void onTapUp(details) {
-    final touchArea = Rect.fromCenter(
-      center: details.localPosition,
-      width: 20,
-      height: 20,
-    );
-
-    bool handled = false;
-    components.forEach((c) {
-      if (c is PositionComponent && c.toRect().overlaps(touchArea)) {
-        handled = true;
-        markToRemove(c);
-      }
-    });
-
-    if (!handled) {
-      addLater(Hand()
-        ..x = touchArea.left
-        ..y = touchArea.top);
-    }
+    hands.drawCard();
   }
 }
