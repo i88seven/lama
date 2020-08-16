@@ -5,11 +5,11 @@ import 'package:flame/components/component.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
-class Hand extends PositionComponent {
+class FrontCard extends PositionComponent {
   static const Size cardSize = Size(60, 100);
   final int number;
 
-  Hand(this.number);
+  FrontCard(this.number);
 
   @override
   void render(Canvas c) {
