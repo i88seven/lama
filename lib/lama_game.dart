@@ -51,7 +51,7 @@ class LamaGame extends BaseGame with TapDetector {
         if (c.toRect().overlaps(touchArea)) {
           if (c.state == CardState.Hand) {
             handled = true;
-            hands.discard(c);
+            this.discard(c);
             break;
           }
         }
@@ -59,7 +59,30 @@ class LamaGame extends BaseGame with TapDetector {
     }
 
     if (!handled) {
-      hands.drawCard();
+      this.drawCard();
     }
+  }
+
+  void drawCard() {
+    int number = rand.nextInt(7) + 1;
+    hands.drawCard(number);
+    _gameRef.set({
+      'cards': {
+        'players': hands.numbers,
+      }
+    });
+  }
+
+  void discard(FrontCard card) {
+    print(card.number);
+    hands.discard(card);
+    add(FrontCard(card.number, CardState.Trash)
+      ..x = 300 / 2
+      ..y = 500 / 2);
+    _gameRef.set({
+      'cards': {
+        'players': hands.numbers,
+      }
+    });
   }
 }

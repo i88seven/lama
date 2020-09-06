@@ -17,31 +17,19 @@ class Hands {
     rand = math.Random();
   }
 
-  void drawCard() {
-    int number = rand.nextInt(7) + 1;
+  void drawCard(number) {
     Position pos = Position(
       this.numbers.length * FrontCard.cardSize.width / 2,
       this.game.screenSize.height - FrontCard.cardSize.height,
     );
-
     this.game.add(FrontCard(number, CardState.Hand)
       ..x = pos.x
       ..y = pos.y);
     this.numbers.add(number);
-    gameRef.set({
-      'cards': {
-        'players': [
-          this.numbers,
-        ],
-      }
-    });
   }
 
   void discard(FrontCard card) {
-    print(card.number);
-    this.game.add(FrontCard(card.number, CardState.Trash)
-      ..x = 300 / 2
-      ..y = 500 / 2);
     this.game.markToRemove(card);
+    this.numbers.remove(card.number);
   }
 }
