@@ -1,5 +1,3 @@
-import 'package:flame/position.dart';
-
 import 'package:lama/lama_game.dart';
 import 'package:lama/components/front_card.dart';
 import 'package:lama/constants/card_state.dart';
@@ -10,10 +8,14 @@ class Trashes {
 
   Trashes(this.game);
 
+  void initialize(List<int> numbers) {
+    numbers.forEach((number) => this.add(number));
+  }
+
   void add(number) {
     this.numbers.add(number);
     this.game.add(FrontCard(number, CardState.Trash)
-      ..x = 300 / 2
+      ..x = 400 / 2
       ..y = 500 / 2);
   }
 }

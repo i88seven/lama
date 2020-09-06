@@ -10,6 +10,10 @@ class Hands {
 
   Hands(this.game);
 
+  void initialize(List<int> numbers) {
+    numbers.forEach((number) => drawCard(number));
+  }
+
   void drawCard(number) {
     Position pos = Position(
       this.numbers.length * FrontCard.cardSize.width / 2,
