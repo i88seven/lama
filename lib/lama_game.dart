@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lama/components/hands.dart';
 import 'package:lama/components/front_card.dart';
+import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   bool running = true;
@@ -25,7 +26,7 @@ class LamaGame extends BaseGame with TapDetector {
     rand = math.Random();
     hands = Hands(this, _gameRef);
     int number = rand.nextInt(7) + 1;
-    add(FrontCard(number)
+    add(FrontCard(number, CardState.Trash)
       ..x = 300 / 2
       ..y = 500 / 2);
   }
@@ -48,9 +49,11 @@ class LamaGame extends BaseGame with TapDetector {
     for (final c in components) {
       if (c is FrontCard) {
         if (c.toRect().overlaps(touchArea)) {
-          handled = true;
-          hands.discard(c);
-          break;
+          if (c.state == CardState.Hand) {
+            handled = true;
+            hands.discard(c);
+            break;
+          }
         }
       }
     }

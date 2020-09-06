@@ -5,11 +5,15 @@ import 'package:flame/components/component.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
+import 'package:lama/constants/card_state.dart';
+
+// 表向きのカード描画
 class FrontCard extends PositionComponent {
   static const Size cardSize = Size(60, 100);
   final int number;
+  final CardState state;
 
-  FrontCard(this.number);
+  FrontCard(this.number, this.state);
 
   @override
   void render(Canvas c) {
