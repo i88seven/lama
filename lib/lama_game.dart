@@ -7,12 +7,14 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lama/components/hands.dart';
+import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   bool running = true;
   Hands hands;
+  Trashes trashes;
   Size screenSize;
   math.Random rand;
   DatabaseReference _databaseReference;
@@ -24,11 +26,20 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef = _databaseReference.child(hostName);
     _gameRef.keepSynced(true);
     rand = math.Random();
-    hands = Hands(this, _gameRef);
+    hands = Hands(this);
+    trashes = Trashes(this);
+    // TODO ホストかによって処理を分ける
+    initialize();
+  }
+
+  void initialize() {
     int number = rand.nextInt(7) + 1;
-    add(FrontCard(number, CardState.Trash)
-      ..x = 300 / 2
-      ..y = 500 / 2);
+    this.trashes.add(number);
+    _gameRef.set({
+      'cards': {
+        'trashes': this.trashes.numbers,
+      }
+    });
   }
 
   @override
@@ -82,6 +93,13 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef.set({
       'cards': {
         'players': hands.numbers,
+      }
+    });
+
+    this.trashes.add(card.number);
+    _gameRef.set({
+      'cards': {
+        'trashes': this.trashes.numbers,
       }
     });
   }
