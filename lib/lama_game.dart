@@ -35,11 +35,7 @@ class LamaGame extends BaseGame with TapDetector {
   void initialize() {
     int number = rand.nextInt(7) + 1;
     this.trashes.add(number);
-    _gameRef.set({
-      'cards': {
-        'trashes': this.trashes.numbers,
-      }
-    });
+    _gameRef.child('cards').child('trashes').set(this.trashes.numbers);
   }
 
   @override
@@ -77,11 +73,7 @@ class LamaGame extends BaseGame with TapDetector {
   void drawCard() {
     int number = rand.nextInt(7) + 1;
     hands.drawCard(number);
-    _gameRef.set({
-      'cards': {
-        'players': hands.numbers,
-      }
-    });
+    _gameRef.child('cards').child('players').set(this.hands.numbers);
   }
 
   void discard(FrontCard card) {
@@ -90,17 +82,9 @@ class LamaGame extends BaseGame with TapDetector {
     add(FrontCard(card.number, CardState.Trash)
       ..x = 300 / 2
       ..y = 500 / 2);
-    _gameRef.set({
-      'cards': {
-        'players': hands.numbers,
-      }
-    });
+    _gameRef.child('cards').child('players').set(this.hands.numbers);
 
     this.trashes.add(card.number);
-    _gameRef.set({
-      'cards': {
-        'trashes': this.trashes.numbers,
-      }
-    });
+    _gameRef.child('cards').child('trashes').set(this.trashes.numbers);
   }
 }
