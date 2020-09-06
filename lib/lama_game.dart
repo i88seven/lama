@@ -100,16 +100,22 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void drawCard() {
-    int number = rand.nextInt(7) + 1;
-    hands.drawCard(number);
-    _gameRef.child('cards').child('players').set(this.hands.numbers);
+    int drawNumber = this.stocks.drawCard();
+    this.hands.drawCard(drawNumber);
+    _gameRef.child('cards').set({
+      'players': this.hands.numbers,
+      'stocks': this.stocks.numbers,
+      'trashes': this.trashes.numbers,
+    });
   }
 
   void discard(FrontCard card) {
     this.hands.discard(card);
-    _gameRef.child('cards').child('players').set(this.hands.numbers);
-
     this.trashes.add(card.number);
-    _gameRef.child('cards').child('trashes').set(this.trashes.numbers);
+    _gameRef.child('cards').set({
+      'players': this.hands.numbers,
+      'stocks': this.stocks.numbers,
+      'trashes': this.trashes.numbers,
+    });
   }
 }

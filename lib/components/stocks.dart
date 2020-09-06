@@ -14,4 +14,10 @@ class Stocks {
       ..x = 200 / 2
       ..y = 500 / 2);
   }
+
+  int drawCard() {
+    int drawNumber = this.numbers[0];
+    this.numbers.removeAt(0);
+    return drawNumber;
+  }
 }
