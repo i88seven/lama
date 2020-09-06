@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/position.dart';
 
 import 'package:lama/lama_game.dart';
@@ -8,9 +9,10 @@ import 'package:lama/components/front_card.dart';
 class Hands {
   List<int> numbers = [];
   final LamaGame game;
+  final DatabaseReference gameRef;
   math.Random rand;
 
-  Hands(this.game) {
+  Hands(this.game, this.gameRef) {
     rand = math.Random();
   }
 
@@ -25,6 +27,13 @@ class Hands {
       ..x = pos.x
       ..y = pos.y);
     this.numbers.add(number);
+    gameRef.set({
+      'cards': {
+        'players': [
+          this.numbers,
+        ],
+      }
+    });
   }
 
   void discard(FrontCard card) {

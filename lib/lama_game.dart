@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,16 @@ class LamaGame extends BaseGame with TapDetector {
   Hands hands;
   Size screenSize;
   math.Random rand;
+  DatabaseReference _databaseReference;
+  DatabaseReference _gameRef;
+  String hostName = 'i88seven'; // TODO
 
   LamaGame() {
+    _databaseReference = FirebaseDatabase.instance.reference();
+    _gameRef = _databaseReference.child(hostName);
+    _gameRef.keepSynced(true);
     rand = math.Random();
-    hands = Hands(this);
+    hands = Hands(this, _gameRef);
     int number = rand.nextInt(7) + 1;
     add(FrontCard(number)
       ..x = 300 / 2
