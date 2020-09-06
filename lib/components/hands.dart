@@ -11,6 +11,7 @@ class Hands {
   Hands(this.game);
 
   void initialize(List<int> numbers) {
+    numbers.sort();
     numbers.forEach((number) => drawCard(number));
   }
 
@@ -23,6 +24,7 @@ class Hands {
       ..x = pos.x
       ..y = pos.y);
     this.numbers.add(number);
+    this.numbers.sort();
   }
 
   void discard(FrontCard card) {
