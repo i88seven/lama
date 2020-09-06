@@ -10,6 +10,7 @@ import 'package:lama/components/hands.dart';
 import 'package:lama/components/stocks.dart';
 import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
+import 'package:lama/components/back_card.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
@@ -67,6 +68,7 @@ class LamaGame extends BaseGame with TapDetector {
   void onTapUp(details) {
     if (isReady) {
       // TODO ホストかによって処理を分ける
+      isReady = false;
       this.initialize();
       return;
     }
@@ -76,21 +78,24 @@ class LamaGame extends BaseGame with TapDetector {
       height: 2,
     );
 
-    bool handled = false;
     for (final c in components) {
       if (c is FrontCard) {
         if (c.toRect().overlaps(touchArea)) {
           if (c.state == CardState.Hand) {
-            handled = true;
             this.discard(c);
             break;
           }
         }
       }
-    }
 
-    if (!handled) {
-      this.drawCard();
+      if (c is BackCard) {
+        if (c.toRect().overlaps(touchArea)) {
+          if (c.state == CardState.Stock) {
+            this.drawCard();
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -101,11 +106,7 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void discard(FrontCard card) {
-    print(card.number);
-    hands.discard(card);
-    add(FrontCard(card.number, CardState.Trash)
-      ..x = 300 / 2
-      ..y = 500 / 2);
+    this.hands.discard(card);
     _gameRef.child('cards').child('players').set(this.hands.numbers);
 
     this.trashes.add(card.number);

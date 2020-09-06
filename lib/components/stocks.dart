@@ -1,5 +1,5 @@
 import 'package:lama/lama_game.dart';
-import 'package:lama/components/front_card.dart';
+import 'package:lama/components/back_card.dart';
 import 'package:lama/constants/card_state.dart';
 
 class Stocks {
@@ -10,7 +10,7 @@ class Stocks {
 
   void initialize(numbers) {
     this.numbers = numbers;
-    this.game.add(FrontCard(1, CardState.Trash)
+    this.game.add(BackCard(CardState.Stock)
       ..x = 200 / 2
       ..y = 500 / 2);
   }
