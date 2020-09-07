@@ -9,11 +9,16 @@ class Trashes {
   Trashes(this.game);
 
   void initialize(List<int> numbers) {
-    numbers.forEach((number) => this.add(number));
+    this.numbers = numbers;
+    _render(numbers.last);
   }
 
   void add(number) {
     this.numbers.add(number);
+    _render(number);
+  }
+
+  void _render(number) {
     this.game.add(FrontCard(number, CardState.Trash)
       ..x = 400 / 2
       ..y = 500 / 2);

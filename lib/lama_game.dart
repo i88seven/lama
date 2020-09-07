@@ -32,6 +32,8 @@ class LamaGame extends BaseGame with TapDetector {
     hands = Hands(this);
     trashes = Trashes(this);
     stocks = Stocks(this);
+
+    _gameRef.child('cards').onChildChanged.listen(_onChangeCard);
   }
 
   void initialize() {
@@ -42,6 +44,17 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': this.stocks.numbers,
       'trashes': this.trashes.numbers,
     });
+  }
+
+  void _onChangeCard(Event e) {
+    if (e.snapshot.key == 'trashes') {
+      this.trashes.initialize(e.snapshot.value.cast<int>());
+      return;
+    }
+    if (e.snapshot.key == 'stocks') {
+      this.stocks.initialize(e.snapshot.value.cast<int>());
+      return;
+    }
   }
 
   void _deal() {
