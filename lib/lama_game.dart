@@ -95,8 +95,9 @@ class LamaGame extends BaseGame with TapDetector {
       if (c is FrontCard) {
         if (c.toRect().overlaps(touchArea)) {
           if (c.state == CardState.Hand) {
-            this.discard(c);
-            break;
+            if (_discard(c)) {
+              break;
+            }
           }
         }
       }
@@ -122,7 +123,11 @@ class LamaGame extends BaseGame with TapDetector {
     });
   }
 
-  void discard(FrontCard card) {
+  bool _discard(FrontCard card) {
+    int numberDiff = card.number - this.trashes.numbers.last;
+    if (numberDiff != 0 && numberDiff != 1 && numberDiff != -6) {
+      return false;
+    }
     this.hands.discard(card);
     this.trashes.add(card.number);
     _gameRef.child('cards').set({
@@ -130,5 +135,6 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': this.stocks.numbers,
       'trashes': this.trashes.numbers,
     });
+    return true;
   }
 }
