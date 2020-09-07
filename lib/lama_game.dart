@@ -48,11 +48,11 @@ class LamaGame extends BaseGame with TapDetector {
 
   void _onChangeCard(Event e) {
     if (e.snapshot.key == 'trashes') {
-      this.trashes.initialize(e.snapshot.value.cast<int>());
+      this.trashes.initialize(List<int>.from(e.snapshot.value));
       return;
     }
     if (e.snapshot.key == 'stocks') {
-      this.stocks.initialize(e.snapshot.value.cast<int>());
+      this.stocks.initialize(List<int>.from(e.snapshot.value));
       return;
     }
   }
