@@ -7,6 +7,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lama/components/hands.dart';
+import 'package:lama/components/other_hands.dart';
 import 'package:lama/components/stocks.dart';
 import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
@@ -16,6 +17,7 @@ import 'package:lama/constants/card_state.dart';
 class LamaGame extends BaseGame with TapDetector {
   bool isReady = true;
   Hands hands;
+  List<OtherHands> othersHands;
   Stocks stocks;
   Trashes trashes;
   Size screenSize;
@@ -23,6 +25,8 @@ class LamaGame extends BaseGame with TapDetector {
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
   String hostName = 'i88seven'; // TODO
+  int playerCount = 4; // TODO
+  int myOrder = 3; // TODO
 
   LamaGame() {
     _databaseReference = FirebaseDatabase.instance.reference();
@@ -30,6 +34,7 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef.keepSynced(true);
     rand = math.Random();
     hands = Hands(this);
+    othersHands = [];
     trashes = Trashes(this);
     stocks = Stocks(this);
 
@@ -55,13 +60,23 @@ class LamaGame extends BaseGame with TapDetector {
   void _deal() {
     List<int> stocks = List<int>.generate(7 * 8, (int index) => index ~/ 8 + 1);
     stocks.shuffle();
-    List<int> hands = stocks.sublist(0, 6);
-    stocks.removeRange(0, 6);
-    // player 分繰り返す
+    List<List<int>> playersCards = [];
+    for (int i = 0; i < this.playerCount; i++) {
+      playersCards.add(stocks.sublist(0, 6));
+      stocks.removeRange(0, 6);
+    }
     List<int> trashes = stocks.sublist(0, 1);
     stocks.removeRange(0, 1);
 
-    this.hands.initialize(hands);
+    playersCards.asMap().forEach((i, playerCards) {
+      if (i == this.playerCount - 1) {
+        this.hands.initialize(playerCards);
+      } else {
+        OtherHands otherHands = OtherHands(this);
+        otherHands.initialize(playerCards, i);
+        this.othersHands.add(otherHands);
+      }
+    });
     this.stocks.initialize(stocks);
     this.trashes.initialize(trashes);
   }
@@ -126,8 +141,15 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void _setCardsAtDatabase() {
+    List<List<int>> playersCards = [
+      this.hands.numbers,
+      ...(this.othersHands.map((otherHands) => otherHands.numbers))
+    ];
     _gameRef.child('cards').set({
-      'players': this.hands.numbers,
+      'players': [
+        ...(playersCards.sublist(this.playerCount - this.myOrder)),
+        ...(playersCards.sublist(0, (this.playerCount - this.myOrder)))
+      ],
       'stocks': this.stocks.numbers,
       'trashes': this.trashes.numbers,
     });
