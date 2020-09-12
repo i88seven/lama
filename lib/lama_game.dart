@@ -26,7 +26,7 @@ class LamaGame extends BaseGame with TapDetector {
   DatabaseReference _gameRef;
   String hostName = 'i88seven'; // TODO
   int playerCount = 4; // TODO
-  int myOrder = 3; // TODO
+  int myOrder;
 
   LamaGame() {
     _databaseReference = FirebaseDatabase.instance.reference();
@@ -58,6 +58,8 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void _deal() {
+    this.myOrder = this.rand.nextInt(this.playerCount);
+
     List<int> stocks = List<int>.generate(7 * 8, (int index) => index ~/ 8 + 1);
     stocks.shuffle();
     List<List<int>> playersCards = [];
