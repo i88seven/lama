@@ -38,12 +38,7 @@ class LamaGame extends BaseGame with TapDetector {
 
   void initialize() {
     _deal();
-
-    _gameRef.child('cards').set({
-      'players': this.hands.numbers,
-      'stocks': this.stocks.numbers,
-      'trashes': this.trashes.numbers,
-    });
+    _setCardsAtDatabase();
   }
 
   void _onChangeCard(Event e) {
@@ -116,11 +111,7 @@ class LamaGame extends BaseGame with TapDetector {
   void drawCard() {
     int drawNumber = this.stocks.drawCard();
     this.hands.drawCard(drawNumber);
-    _gameRef.child('cards').set({
-      'players': this.hands.numbers,
-      'stocks': this.stocks.numbers,
-      'trashes': this.trashes.numbers,
-    });
+    _setCardsAtDatabase();
   }
 
   bool _discard(FrontCard card) {
@@ -130,11 +121,15 @@ class LamaGame extends BaseGame with TapDetector {
     }
     this.hands.discard(card);
     this.trashes.add(card.number);
+    _setCardsAtDatabase();
+    return true;
+  }
+
+  void _setCardsAtDatabase() {
     _gameRef.child('cards').set({
       'players': this.hands.numbers,
       'stocks': this.stocks.numbers,
       'trashes': this.trashes.numbers,
     });
-    return true;
   }
 }
