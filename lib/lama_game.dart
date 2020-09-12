@@ -6,6 +6,7 @@ import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'package:lama/components/game_player.dart';
 import 'package:lama/components/hands.dart';
 import 'package:lama/components/other_hands.dart';
 import 'package:lama/components/stocks.dart';
@@ -16,6 +17,7 @@ import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   bool isReady = true;
+  List<GamePlayer> _gamePlayers;
   Hands _hands;
   List<OtherHands> _othersHands;
   Stocks _stocks;
@@ -24,7 +26,7 @@ class LamaGame extends BaseGame with TapDetector {
   math.Random _rand;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
-  String hostName = 'i88seven'; // TODO
+  String hostName = 'test2'; // TODO
   int playerCount = 4; // TODO
   int myOrder;
   int currentOrder;
@@ -34,6 +36,7 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef = _databaseReference.child(hostName);
     _gameRef.keepSynced(true);
     _rand = math.Random();
+    _gamePlayers = [];
     _hands = Hands(this);
     _othersHands = [];
     _trashes = Trashes(this);
@@ -43,6 +46,15 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void initialize() {
+    // TODO
+    for (int i = 0; i < 4; i++) {
+      GamePlayer gamePlayer = GamePlayer("test$i");
+      gamePlayer.initialize();
+      _gamePlayers.add(gamePlayer);
+    }
+    _gameRef
+        .child('players')
+        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
     _deal();
     _setCardsAtDatabase();
   }
