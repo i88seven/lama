@@ -28,7 +28,7 @@ class LamaGame extends BaseGame with TapDetector {
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
   String hostName = 'test0'; // TODO
-  String myName = 'test0'; // TODO
+  String myName; // TODO
   int myOrder;
   int currentOrder;
 
@@ -75,6 +75,13 @@ class LamaGame extends BaseGame with TapDetector {
     if (e.snapshot.key == 'cards') {
       List<List<dynamic>> playersCards =
           List<List<dynamic>>.from(e.snapshot.value['players']);
+
+      if (_othersHands.length == 0) {
+        for (int i = 0; i < this.playerCount - 1; i++) {
+          OtherHands otherHands = OtherHands(this, i);
+          _othersHands.add(otherHands);
+        }
+      }
       playersCards.asMap().forEach((i, playerCards) {
         if (i == this.myOrder) {
           _hands.initialize(List<int>.from(playerCards));
@@ -90,6 +97,24 @@ class LamaGame extends BaseGame with TapDetector {
     }
     if (e.snapshot.key == 'current') {
       this.currentOrder = e.snapshot.value;
+      return;
+    }
+    if (e.snapshot.key == 'players') {
+      // players の子での initialize
+      if (_gamePlayers.length == 0) {
+        this.myOrder = e.snapshot.value
+            .indexWhere((gamePlayer) => gamePlayer['name'] == this.myName);
+
+        e.snapshot.value.forEach((value) {
+          GamePlayer gamePlayer = GamePlayer(value['name']);
+          gamePlayer.initialize();
+          _gamePlayers.add(gamePlayer);
+        });
+      }
+      e.snapshot.value.asMap().forEach((index, gamePlayer) {
+        _gamePlayers[index].set(gamePlayer['points'], gamePlayer['isFinished']);
+      });
+      return;
     }
   }
 
@@ -128,15 +153,24 @@ class LamaGame extends BaseGame with TapDetector {
   @override
   void onTapUp(details) {
     if (isReady) {
-      // TODO ホストかによって処理を分ける
       isReady = false;
-      this.initialize();
+      // TODO
+      if (details.localPosition.dx < 300) {
+        myName = 'test0';
+      } else {
+        myName = 'test1';
+      }
+      if (myName == hostName) {
+        this.initialize();
+      }
       return;
     }
 
     if (isReadyGame) {
       isReadyGame = false;
-      _deal();
+      if (myName == hostName) {
+        _deal();
+      }
       return;
     }
 

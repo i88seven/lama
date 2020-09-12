@@ -10,6 +10,11 @@ class GamePlayer {
     this.isFinished = false;
   }
 
+  void set(int points, bool isFinished) {
+    this.points = points;
+    this.isFinished = isFinished;
+  }
+
   void newRound() {
     this.isFinished = false;
   }
