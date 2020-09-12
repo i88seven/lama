@@ -164,7 +164,7 @@ class LamaGame extends BaseGame with TapDetector {
     int drawNumber = _stocks.drawCard();
     _hands.drawCard(drawNumber);
     _setCardsAtDatabase();
-    _gameRef.child('current').set(this.myOrder + 1);
+    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
   }
 
   bool _discard(FrontCard card) {
@@ -175,7 +175,7 @@ class LamaGame extends BaseGame with TapDetector {
     _hands.discard(card);
     _trashes.add(card.number);
     _setCardsAtDatabase();
-    _gameRef.child('current').set(this.myOrder + 1);
+    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
     return true;
   }
 
