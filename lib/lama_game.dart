@@ -27,6 +27,7 @@ class LamaGame extends BaseGame with TapDetector {
   String hostName = 'i88seven'; // TODO
   int playerCount = 4; // TODO
   int myOrder;
+  int currentOrder;
 
   LamaGame() {
     _databaseReference = FirebaseDatabase.instance.reference();
@@ -38,7 +39,7 @@ class LamaGame extends BaseGame with TapDetector {
     trashes = Trashes(this);
     stocks = Stocks(this);
 
-    _gameRef.child('cards').onChildChanged.listen(_onChangeCard);
+    _gameRef.onChildChanged.listen(_onChange);
   }
 
   void initialize() {
@@ -46,14 +47,25 @@ class LamaGame extends BaseGame with TapDetector {
     _setCardsAtDatabase();
   }
 
-  void _onChangeCard(Event e) {
-    if (e.snapshot.key == 'trashes') {
-      this.trashes.initialize(List<int>.from(e.snapshot.value));
+  void _onChange(Event e) {
+    if (e.snapshot.key == 'cards') {
+      List<List<dynamic>> playersCards =
+          List<List<dynamic>>.from(e.snapshot.value['players']);
+      playersCards.asMap().forEach((i, playerCards) {
+        if (i == this.myOrder) {
+          this.hands.initialize(List<int>.from(playerCards));
+        } else {
+          this
+              .othersHands[(i - this.myOrder - 1) % this.playerCount]
+              .set(List<int>.from(playerCards));
+        }
+      });
+      this.stocks.initialize(List<int>.from(e.snapshot.value['stocks']));
+      this.trashes.initialize(List<int>.from(e.snapshot.value['trashes']));
       return;
     }
-    if (e.snapshot.key == 'stocks') {
-      this.stocks.initialize(List<int>.from(e.snapshot.value));
-      return;
+    if (e.snapshot.key == 'current') {
+      this.currentOrder = e.snapshot.value;
     }
   }
 
@@ -81,6 +93,9 @@ class LamaGame extends BaseGame with TapDetector {
     });
     this.stocks.initialize(stocks);
     this.trashes.initialize(trashes);
+
+    this.currentOrder = 0;
+    _gameRef.child('current').set(this.currentOrder);
   }
 
   @override
@@ -97,6 +112,11 @@ class LamaGame extends BaseGame with TapDetector {
       this.initialize();
       return;
     }
+
+    if (this.currentOrder != this.myOrder) {
+      return;
+    }
+
     final touchArea = Rect.fromCenter(
       center: details.localPosition,
       width: 2,
@@ -129,6 +149,7 @@ class LamaGame extends BaseGame with TapDetector {
     int drawNumber = this.stocks.drawCard();
     this.hands.drawCard(drawNumber);
     _setCardsAtDatabase();
+    _gameRef.child('current').set(this.myOrder + 1);
   }
 
   bool _discard(FrontCard card) {
@@ -139,6 +160,7 @@ class LamaGame extends BaseGame with TapDetector {
     this.hands.discard(card);
     this.trashes.add(card.number);
     _setCardsAtDatabase();
+    _gameRef.child('current').set(this.myOrder + 1);
     return true;
   }
 
