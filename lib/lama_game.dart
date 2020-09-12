@@ -16,12 +16,12 @@ import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   bool isReady = true;
-  Hands hands;
-  List<OtherHands> othersHands;
-  Stocks stocks;
-  Trashes trashes;
+  Hands _hands;
+  List<OtherHands> _othersHands;
+  Stocks _stocks;
+  Trashes _trashes;
   Size screenSize;
-  math.Random rand;
+  math.Random _rand;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
   String hostName = 'i88seven'; // TODO
@@ -33,11 +33,11 @@ class LamaGame extends BaseGame with TapDetector {
     _databaseReference = FirebaseDatabase.instance.reference();
     _gameRef = _databaseReference.child(hostName);
     _gameRef.keepSynced(true);
-    rand = math.Random();
-    hands = Hands(this);
-    othersHands = [];
-    trashes = Trashes(this);
-    stocks = Stocks(this);
+    _rand = math.Random();
+    _hands = Hands(this);
+    _othersHands = [];
+    _trashes = Trashes(this);
+    _stocks = Stocks(this);
 
     _gameRef.onChildChanged.listen(_onChange);
   }
@@ -53,15 +53,14 @@ class LamaGame extends BaseGame with TapDetector {
           List<List<dynamic>>.from(e.snapshot.value['players']);
       playersCards.asMap().forEach((i, playerCards) {
         if (i == this.myOrder) {
-          this.hands.initialize(List<int>.from(playerCards));
+          _hands.initialize(List<int>.from(playerCards));
         } else {
-          this
-              .othersHands[(i - this.myOrder - 1) % this.playerCount]
+          _othersHands[(i - this.myOrder - 1) % this.playerCount]
               .set(List<int>.from(playerCards));
         }
       });
-      this.stocks.initialize(List<int>.from(e.snapshot.value['stocks']));
-      this.trashes.initialize(List<int>.from(e.snapshot.value['trashes']));
+      _stocks.initialize(List<int>.from(e.snapshot.value['stocks']));
+      _trashes.initialize(List<int>.from(e.snapshot.value['trashes']));
       return;
     }
     if (e.snapshot.key == 'current') {
@@ -70,7 +69,7 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void _deal() {
-    this.myOrder = this.rand.nextInt(this.playerCount);
+    this.myOrder = _rand.nextInt(this.playerCount);
 
     List<int> stocks = List<int>.generate(7 * 8, (int index) => index ~/ 8 + 1);
     stocks.shuffle();
@@ -84,15 +83,15 @@ class LamaGame extends BaseGame with TapDetector {
 
     playersCards.asMap().forEach((i, playerCards) {
       if (i == this.playerCount - 1) {
-        this.hands.initialize(playerCards);
+        _hands.initialize(playerCards);
       } else {
         OtherHands otherHands = OtherHands(this);
         otherHands.initialize(playerCards, i);
-        this.othersHands.add(otherHands);
+        _othersHands.add(otherHands);
       }
     });
-    this.stocks.initialize(stocks);
-    this.trashes.initialize(trashes);
+    _stocks.initialize(stocks);
+    _trashes.initialize(trashes);
 
     this.currentOrder = 0;
     _gameRef.child('current').set(this.currentOrder);
@@ -146,19 +145,19 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void drawCard() {
-    int drawNumber = this.stocks.drawCard();
-    this.hands.drawCard(drawNumber);
+    int drawNumber = _stocks.drawCard();
+    _hands.drawCard(drawNumber);
     _setCardsAtDatabase();
     _gameRef.child('current').set(this.myOrder + 1);
   }
 
   bool _discard(FrontCard card) {
-    int numberDiff = card.number - this.trashes.numbers.last;
+    int numberDiff = card.number - _trashes.numbers.last;
     if (numberDiff != 0 && numberDiff != 1 && numberDiff != -6) {
       return false;
     }
-    this.hands.discard(card);
-    this.trashes.add(card.number);
+    _hands.discard(card);
+    _trashes.add(card.number);
     _setCardsAtDatabase();
     _gameRef.child('current').set(this.myOrder + 1);
     return true;
@@ -166,16 +165,16 @@ class LamaGame extends BaseGame with TapDetector {
 
   void _setCardsAtDatabase() {
     List<List<int>> playersCards = [
-      this.hands.numbers,
-      ...(this.othersHands.map((otherHands) => otherHands.numbers))
+      _hands.numbers,
+      ...(_othersHands.map((otherHands) => otherHands.numbers))
     ];
     _gameRef.child('cards').set({
       'players': [
         ...(playersCards.sublist(this.playerCount - this.myOrder)),
         ...(playersCards.sublist(0, (this.playerCount - this.myOrder)))
       ],
-      'stocks': this.stocks.numbers,
-      'trashes': this.trashes.numbers,
+      'stocks': _stocks.numbers,
+      'trashes': _trashes.numbers,
     });
   }
 }
