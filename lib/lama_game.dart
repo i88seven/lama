@@ -27,9 +27,12 @@ class LamaGame extends BaseGame with TapDetector {
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
   String hostName = 'test2'; // TODO
-  int playerCount = 4; // TODO
   int myOrder;
   int currentOrder;
+
+  int get playerCount {
+    return _gamePlayers.length;
+  }
 
   LamaGame() {
     _databaseReference = FirebaseDatabase.instance.reference();
