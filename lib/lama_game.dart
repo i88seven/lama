@@ -69,11 +69,12 @@ class LamaGame extends BaseGame with TapDetector {
       playersCards.asMap().forEach((i, playerCards) {
         if (i == this.myOrder) {
           _hands.initialize(List<int>.from(playerCards));
-        } else {
-          _othersHands[(i - this.myOrder - 1) % this.playerCount]
-              .set(List<int>.from(playerCards));
+          return;
         }
+        _othersHands[(i - this.myOrder - 1) % this.playerCount]
+            .initialize(List<int>.from(playerCards));
       });
+
       _stocks.initialize(List<int>.from(e.snapshot.value['stocks']));
       _trashes.initialize(List<int>.from(e.snapshot.value['trashes']));
       return;
@@ -100,8 +101,8 @@ class LamaGame extends BaseGame with TapDetector {
       if (i == this.playerCount - 1) {
         _hands.initialize(playerCards);
       } else {
-        OtherHands otherHands = OtherHands(this);
-        otherHands.initialize(playerCards, i);
+        OtherHands otherHands = OtherHands(this, i);
+        otherHands.initialize(playerCards);
         _othersHands.add(otherHands);
       }
     });

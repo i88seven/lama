@@ -9,16 +9,9 @@ class OtherHands {
   final LamaGame game;
   int order; // 自分から見て次の人が "0"
 
-  OtherHands(this.game);
+  OtherHands(this.game, this.order);
 
-  void initialize(List<int> numbers, int order) {
-    numbers.sort();
-    this.numbers = numbers;
-    this.order = order;
-    _render();
-  }
-
-  void set(List<int> numbers) {
+  void initialize(List<int> numbers) {
     numbers.sort();
     this.numbers = numbers;
     _render();
