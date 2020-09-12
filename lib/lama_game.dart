@@ -17,6 +17,7 @@ import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
   bool isReady = true;
+  bool isReadyGame = true;
   List<GamePlayer> _gamePlayers;
   Hands _hands;
   List<OtherHands> _othersHands;
@@ -26,7 +27,8 @@ class LamaGame extends BaseGame with TapDetector {
   math.Random _rand;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
-  String hostName = 'test2'; // TODO
+  String hostName = 'test0'; // TODO
+  String myName = 'test0'; // TODO
   int myOrder;
   int currentOrder;
 
@@ -50,16 +52,23 @@ class LamaGame extends BaseGame with TapDetector {
 
   void initialize() {
     // TODO
-    for (int i = 0; i < 4; i++) {
-      GamePlayer gamePlayer = GamePlayer("test$i");
+    List<String> playerNames = ['test0', 'test1'];
+    playerNames.shuffle();
+    playerNames.asMap().forEach((index, playerName) {
+      GamePlayer gamePlayer = GamePlayer(playerName);
       gamePlayer.initialize();
       _gamePlayers.add(gamePlayer);
-    }
+
+      if (gamePlayer.name == myName) {
+        this.myOrder = index;
+      }
+    });
     _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
-    _deal();
-    _setCardsAtDatabase();
+
+    this.currentOrder = 0;
+    _gameRef.child('current').set(this.currentOrder);
   }
 
   void _onChange(Event e) {
@@ -85,8 +94,6 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void _deal() {
-    this.myOrder = _rand.nextInt(this.playerCount);
-
     List<int> stocks = List<int>.generate(7 * 8, (int index) => index ~/ 8 + 1);
     stocks.shuffle();
     List<List<int>> playersCards = [];
@@ -109,8 +116,7 @@ class LamaGame extends BaseGame with TapDetector {
     _stocks.initialize(stocks);
     _trashes.initialize(trashes);
 
-    this.currentOrder = 0;
-    _gameRef.child('current').set(this.currentOrder);
+    _setCardsAtDatabase();
   }
 
   @override
@@ -125,6 +131,12 @@ class LamaGame extends BaseGame with TapDetector {
       // TODO ホストかによって処理を分ける
       isReady = false;
       this.initialize();
+      return;
+    }
+
+    if (isReadyGame) {
+      isReadyGame = false;
+      _deal();
       return;
     }
 
