@@ -13,6 +13,7 @@ import 'package:lama/components/stocks.dart';
 import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
 import 'package:lama/components/back_card.dart';
+import 'package:lama/components/pass_button.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
@@ -32,6 +33,7 @@ class LamaGame extends BaseGame with TapDetector {
   String myName; // TODO
   int myOrder;
   int currentOrder;
+  PassButton _passButton;
 
   int get playerCount {
     return _playerNames.length;
@@ -182,6 +184,10 @@ class LamaGame extends BaseGame with TapDetector {
       if (myName == hostName) {
         _deal();
       }
+      _passButton = PassButton();
+      this.add(_passButton
+        ..x = this.screenSize.width - 100
+        ..y = this.screenSize.height - 180);
       return;
     }
 
