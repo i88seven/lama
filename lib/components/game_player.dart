@@ -42,7 +42,7 @@ class GamePlayer {
   void subtractPoints() {
     if (this.points > 9) {
       this.points -= 10;
-    } else {
+    } else if (this.points > 0) {
       this.points -= 1;
     }
     _render();
