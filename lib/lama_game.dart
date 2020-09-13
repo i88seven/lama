@@ -184,7 +184,7 @@ class LamaGame extends BaseGame with TapDetector {
       if (myName == hostName) {
         _deal();
       }
-      _passButton = PassButton();
+      _passButton = PassButton(false);
       this.add(_passButton
         ..x = this.screenSize.width - 100
         ..y = this.screenSize.height - 180);
@@ -255,6 +255,12 @@ class LamaGame extends BaseGame with TapDetector {
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
     _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
+
+    this.markToRemove(_passButton);
+    _passButton = PassButton(true);
+    this.add(_passButton
+      ..x = this.screenSize.width - 100
+      ..y = this.screenSize.height - 180);
   }
 
   void _setCardsAtDatabase() {

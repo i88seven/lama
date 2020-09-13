@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 
 class PassButton extends PositionComponent {
   static const Size _size = Size(80, 56);
+  final bool _disabled;
 
-  PassButton();
+  PassButton(this._disabled);
 
   @override
   void render(Canvas c) {
     prepareCanvas(c);
 
+    Color bgColor = _disabled ? Color(0xFF718A73) : Color(0xFF39C23F);
     c.drawRect(Rect.fromLTWH(0, 0, _size.width, _size.height),
-        PaletteEntry(Color(0xFF39C23F)).paint);
+        PaletteEntry(bgColor).paint);
     final textStyle = TextStyle(
       color: Colors.white,
       fontSize: 30,
