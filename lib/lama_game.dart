@@ -153,6 +153,7 @@ class LamaGame extends BaseGame with TapDetector {
     List<int> trashes = stocks.sublist(0, 1);
     stocks.removeRange(0, 1);
 
+    _othersHands = [];
     playersCards.asMap().forEach((i, playerCards) {
       if (i == this.playerCount - 1) {
         _hands.initialize(playerCards);
