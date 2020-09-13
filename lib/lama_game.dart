@@ -18,6 +18,7 @@ import 'package:lama/constants/card_state.dart';
 class LamaGame extends BaseGame with TapDetector {
   bool isReady = true;
   bool isReadyGame = true;
+  List<String> _playerNames;
   List<GamePlayer> _gamePlayers;
   Hands _hands;
   List<OtherHands> _othersHands;
@@ -33,7 +34,7 @@ class LamaGame extends BaseGame with TapDetector {
   int currentOrder;
 
   int get playerCount {
-    return _gamePlayers.length;
+    return _playerNames.length;
   }
 
   LamaGame() {
@@ -41,6 +42,7 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef = _databaseReference.child(hostName);
     _gameRef.keepSynced(true);
     _rand = math.Random();
+    _playerNames = [];
     _gamePlayers = [];
     _hands = Hands(this);
     _othersHands = [];
@@ -52,16 +54,21 @@ class LamaGame extends BaseGame with TapDetector {
 
   void initialize() {
     // TODO
-    List<String> playerNames = ['test0', 'test1'];
-    playerNames.shuffle();
-    playerNames.asMap().forEach((index, playerName) {
-      GamePlayer gamePlayer = GamePlayer(playerName);
-      gamePlayer.initialize();
-      _gamePlayers.add(gamePlayer);
-
-      if (gamePlayer.name == myName) {
+    _playerNames = ['test0', 'test1', 'test2', 'test3'];
+    _playerNames.shuffle();
+    _playerNames.asMap().forEach((index, playerName) {
+      if (playerName == myName) {
         this.myOrder = index;
       }
+    });
+    _playerNames.asMap().forEach((index, playerName) {
+      GamePlayer gamePlayer = GamePlayer(
+        this,
+        playerName,
+        (index - this.myOrder - 1) % this.playerCount,
+        playerName == this.myName,
+      );
+      _gamePlayers.add(gamePlayer);
     });
     _gameRef
         .child('players')
@@ -106,8 +113,12 @@ class LamaGame extends BaseGame with TapDetector {
             .indexWhere((gamePlayer) => gamePlayer['name'] == this.myName);
 
         e.snapshot.value.forEach((value) {
-          GamePlayer gamePlayer = GamePlayer(value['name']);
-          gamePlayer.initialize();
+          GamePlayer gamePlayer = GamePlayer(
+            this,
+            value['name'],
+            (_gamePlayers.length - this.myOrder - 1) % this.playerCount,
+            value['name'] == this.myName,
+          );
           _gamePlayers.add(gamePlayer);
         });
       }

@@ -22,7 +22,7 @@ class OtherHands {
       Position pos = Position(
         this.game.screenSize.width / (this.game.playerCount - 1) * this.order +
             i * BackCard.cardSize.width / 4,
-        0,
+        80,
       );
       this.game.add(BackCard(CardState.Other)
         ..x = pos.x
