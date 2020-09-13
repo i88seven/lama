@@ -45,4 +45,11 @@ class Hands {
       _cardObjects.add(cardObject);
     });
   }
+
+  int get points {
+    if (this.numbers.length == 0) {
+      return 0;
+    }
+    return this.numbers.toSet().toList().reduce((acc, number) => acc + number);
+  }
 }

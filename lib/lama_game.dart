@@ -133,7 +133,10 @@ class LamaGame extends BaseGame with TapDetector {
         );
       });
       if (_isGameEnd) {
-        // TODO 集計処理
+        if (myName == hostName) {
+          _processRoundEnd();
+          _deal();
+        }
       }
       return;
     }
@@ -163,6 +166,28 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes.initialize(trashes);
 
     _setCardsAtDatabase();
+  }
+
+  void _processRoundEnd() {
+    _gamePlayers.asMap().forEach((index, gamePlayer) {
+      int points;
+      if (index == this.myOrder) {
+        points = _hands.points;
+      } else {
+        points =
+            _othersHands[(index - this.myOrder - 1) % this.playerCount].points;
+      }
+      if (points == 0) {
+        gamePlayer.subtractPoints();
+      } else {
+        gamePlayer.addPoints(points);
+      }
+
+      gamePlayer.newRound();
+    });
+    _gameRef
+        .child('players')
+        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
   }
 
   @override
@@ -290,8 +315,6 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
-
-    // TODO 点数集計
   }
 
   bool get _isGameEnd {

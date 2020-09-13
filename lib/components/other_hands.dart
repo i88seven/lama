@@ -29,4 +29,8 @@ class OtherHands {
         ..y = pos.y);
     }
   }
+
+  int get points {
+    return this.numbers.toSet().toList().reduce((acc, number) => acc + number);
+  }
 }
