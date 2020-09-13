@@ -220,6 +220,13 @@ class LamaGame extends BaseGame with TapDetector {
           }
         }
       }
+
+      if (c is PassButton) {
+        if (c.toRect().overlaps(touchArea)) {
+          _pass();
+          break;
+        }
+      }
     }
   }
 
@@ -240,6 +247,14 @@ class LamaGame extends BaseGame with TapDetector {
     _setCardsAtDatabase();
     _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
     return true;
+  }
+
+  void _pass() {
+    _gamePlayers[this.myOrder].finish();
+    _gameRef
+        .child('players')
+        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
   }
 
   void _setCardsAtDatabase() {
