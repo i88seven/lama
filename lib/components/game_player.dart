@@ -10,6 +10,7 @@ class GamePlayer {
   String name;
   int points;
   bool isFinished;
+  bool isPassed;
   int displayOrder; // 自分から見て次の人が "0"
   bool isMe;
   List<TextComponent> _textObjects = [];
@@ -17,17 +18,20 @@ class GamePlayer {
   GamePlayer(this.game, this.name, this.displayOrder, this.isMe) {
     this.points = 0;
     this.isFinished = false;
+    this.isPassed = false;
     _render();
   }
 
-  void set(int points, bool isFinished) {
+  void set(int points, bool isFinished, bool isPassed) {
     this.points = points;
     this.isFinished = isFinished;
+    this.isPassed = isPassed;
     _render();
   }
 
   void newRound() {
     this.isFinished = false;
+    this.isPassed = false;
   }
 
   void addPoints(int points) {
@@ -42,6 +46,10 @@ class GamePlayer {
       this.points -= 1;
     }
     _render();
+  }
+
+  void pass() {
+    this.isPassed = true;
   }
 
   void finish() {
@@ -77,6 +85,7 @@ class GamePlayer {
       'name': name,
       'points': points,
       'isFinished': isFinished,
+      'isPassed': isPassed,
     };
   }
 }

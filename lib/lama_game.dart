@@ -125,7 +125,11 @@ class LamaGame extends BaseGame with TapDetector {
         });
       }
       e.snapshot.value.asMap().forEach((index, gamePlayer) {
-        _gamePlayers[index].set(gamePlayer['points'], gamePlayer['isFinished']);
+        _gamePlayers[index].set(
+          gamePlayer['points'],
+          gamePlayer['isFinished'],
+          gamePlayer['isPassed'],
+        );
       });
       return;
     }
@@ -223,7 +227,7 @@ class LamaGame extends BaseGame with TapDetector {
 
       if (c is PassButton) {
         if (c.toRect().overlaps(touchArea)) {
-          _finish();
+          _pass();
           break;
         }
       }
@@ -253,8 +257,8 @@ class LamaGame extends BaseGame with TapDetector {
     return true;
   }
 
-  void _finish() {
-    _gamePlayers[this.myOrder].finish();
+  void _pass() {
+    _gamePlayers[this.myOrder].pass();
     _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
@@ -265,6 +269,15 @@ class LamaGame extends BaseGame with TapDetector {
     this.add(_passButton
       ..x = this.screenSize.width - 100
       ..y = this.screenSize.height - 180);
+  }
+
+  void _finish() {
+    _gamePlayers[this.myOrder].finish();
+    _gameRef
+        .child('players')
+        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+
+    // TODO 点数集計
   }
 
   void _setCardsAtDatabase() {
