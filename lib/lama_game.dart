@@ -131,6 +131,9 @@ class LamaGame extends BaseGame with TapDetector {
           gamePlayer['isPassed'],
         );
       });
+      if (_isGameEnd) {
+        // TODO 集計処理
+      }
       return;
     }
   }
@@ -195,7 +198,7 @@ class LamaGame extends BaseGame with TapDetector {
       return;
     }
 
-    if (this.currentOrder != this.myOrder) {
+    if (this.currentOrder != this.myOrder || _isGameEnd) {
       return;
     }
 
@@ -278,6 +281,13 @@ class LamaGame extends BaseGame with TapDetector {
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
 
     // TODO 点数集計
+  }
+
+  bool get _isGameEnd {
+    // 誰か上がってる || 全員パスしてる
+    return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
+            0 ||
+        _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1;
   }
 
   void _setCardsAtDatabase() {
