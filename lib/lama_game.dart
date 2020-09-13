@@ -100,8 +100,9 @@ class LamaGame extends BaseGame with TapDetector {
             .initialize(List<int>.from(playerCards ?? []));
       });
 
-      _stocks.initialize(List<int>.from(e.snapshot.value['stocks']));
-      _trashes.initialize(List<int>.from(e.snapshot.value['trashes']));
+      _stocks.initialize(List<int>.from(e.snapshot.value['stocks'] ?? []));
+      // trashes が 0枚 になることはないが、念のため
+      _trashes.initialize(List<int>.from(e.snapshot.value['trashes'] ?? []));
       return;
     }
     if (e.snapshot.key == 'current') {
@@ -221,7 +222,7 @@ class LamaGame extends BaseGame with TapDetector {
 
       if (c is BackCard) {
         if (c.toRect().overlaps(touchArea)) {
-          if (c.state == CardState.Stock) {
+          if (c.state == CardState.Stock && _canDraw) {
             this.drawCard();
             break;
           }
@@ -288,6 +289,13 @@ class LamaGame extends BaseGame with TapDetector {
     return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
             0 ||
         _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1;
+  }
+
+  bool get _canDraw {
+    // 自分はパスしてない && 山札がある && 自分以外にパスしてない人がいる
+    return !_gamePlayers[this.myOrder].isPassed &&
+        _stocks.numbers.length > 0 &&
+        _gamePlayers.where((gamePlayer) => !gamePlayer.isPassed).length > 1;
   }
 
   void _setCardsAtDatabase() {
