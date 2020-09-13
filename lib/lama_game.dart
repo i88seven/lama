@@ -242,7 +242,7 @@ class LamaGame extends BaseGame with TapDetector {
     int drawNumber = _stocks.drawCard();
     _hands.drawCard(drawNumber);
     _setCardsAtDatabase();
-    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
+    _turnEnd();
   }
 
   bool _discard(FrontCard card) {
@@ -253,7 +253,7 @@ class LamaGame extends BaseGame with TapDetector {
     _hands.discard(card);
     _trashes.add(card.number);
     _setCardsAtDatabase();
-    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
+    _turnEnd();
 
     if (_hands.numbers.length == 0) {
       _finish();
@@ -266,13 +266,23 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
-    _gameRef.child('current').set((this.myOrder + 1) % this.playerCount);
+    _turnEnd();
 
     this.markToRemove(_passButton);
     _passButton = PassButton(true);
     this.add(_passButton
       ..x = this.screenSize.width - 100
       ..y = this.screenSize.height - 180);
+  }
+
+  void _turnEnd() {
+    int nextPlayerIndex = [
+      ...(_gamePlayers.sublist(this.myOrder + 1)),
+      ...(_gamePlayers.sublist(0, this.myOrder + 1))
+    ].indexWhere((gamePlayer) => !gamePlayer.isPassed);
+    _gameRef
+        .child('current')
+        .set((nextPlayerIndex + this.myOrder + 1) % this.playerCount);
   }
 
   void _finish() {
