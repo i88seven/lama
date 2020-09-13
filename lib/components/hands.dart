@@ -50,6 +50,11 @@ class Hands {
     if (this.numbers.length == 0) {
       return 0;
     }
-    return this.numbers.toSet().toList().reduce((acc, number) => acc + number);
+    return this.numbers.toSet().toList().reduce((acc, number) {
+      if (number == 7) {
+        return acc + 10;
+      }
+      return acc + number;
+    });
   }
 }
