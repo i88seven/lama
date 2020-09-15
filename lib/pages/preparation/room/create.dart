@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class RoomCreatePage extends StatefulWidget {
   final String title = '部屋の作成';
@@ -51,6 +52,7 @@ class _RoomCreateForm extends StatefulWidget {
 class _RoomCreateFormState extends State<_RoomCreateForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
+  DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +98,14 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
 
   void _createRoom(User user) async {
     try {
-      // TODO database に登録
+      String myName = 'test'; // TODO localstorage から取得
+      // TODO すでに存在していて、自分以外が作っていたらエラー
+      _databaseReference.child('preparationRooms').set({
+        _roomIdController.text: {
+          'hostUid': user.uid,
+          'hostName': myName,
+        }
+      });
 
       // TODO 画面遷移
     } catch (e) {}
