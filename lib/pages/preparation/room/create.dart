@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lama/pages/preparation/room/create.dart';
 
-class PreparationMainPage extends StatefulWidget {
-  final String title = 'Lama';
+class RoomCreatePage extends StatefulWidget {
+  final String title = '部屋の作成';
   final User user;
 
-  PreparationMainPage({this.user});
+  RoomCreatePage({this.user});
 
   @override
-  State<StatefulWidget> createState() => _PreparationMainPageState();
+  State<StatefulWidget> createState() => _RoomCreatePageState();
 }
 
-class _PreparationMainPageState extends State<PreparationMainPage> {
+class _RoomCreatePageState extends State<RoomCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +31,7 @@ class _PreparationMainPageState extends State<PreparationMainPage> {
               ),
               alignment: Alignment.center,
             ),
-            _PreparationMainForm(user: widget.user),
+            _RoomCreateForm(user: widget.user),
           ],
         );
       }),
@@ -40,18 +39,18 @@ class _PreparationMainPageState extends State<PreparationMainPage> {
   }
 }
 
-class _PreparationMainForm extends StatefulWidget {
+class _RoomCreateForm extends StatefulWidget {
   final User user;
 
-  _PreparationMainForm({this.user});
+  _RoomCreateForm({this.user});
 
   @override
-  State<StatefulWidget> createState() => _PreparationMainFormState();
+  State<StatefulWidget> createState() => _RoomCreateFormState();
 }
 
-class _PreparationMainFormState extends State<_PreparationMainForm> {
+class _RoomCreateFormState extends State<_RoomCreateForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _myNameController = TextEditingController();
+  final TextEditingController _roomIdController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +63,8 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 TextFormField(
-                  controller: _myNameController,
-                  decoration: const InputDecoration(labelText: '表示名'),
+                  controller: _roomIdController,
+                  decoration: const InputDecoration(labelText: '部屋ID'),
                   validator: (String value) {
                     if (value.isEmpty) return '入力してください';
                     return null;
@@ -75,22 +74,10 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
                   padding: const EdgeInsets.only(top: 16.0),
                   alignment: Alignment.center,
                   child: RaisedButton(
-                    child: Text('部屋を立てる'),
+                    child: Text('作成'),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
                         _createRoom(widget.user);
-                      }
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  alignment: Alignment.center,
-                  child: RaisedButton(
-                    child: Text('部屋を探す'),
-                    onPressed: () async {
-                      if (_formKey.currentState.validate()) {
-                        _searchRoom();
                       }
                     },
                   ),
@@ -103,22 +90,14 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
 
   @override
   void dispose() {
-    _myNameController.dispose();
+    _roomIdController.dispose();
     super.dispose();
   }
 
   void _createRoom(User user) async {
     try {
-      // TODO localstorage に登録
+      // TODO database に登録
 
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => RoomCreatePage(user: user)),
-      );
-    } catch (e) {}
-  }
-
-  void _searchRoom() async {
-    try {
       // TODO 画面遷移
     } catch (e) {}
   }
