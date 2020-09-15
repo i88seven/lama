@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 
+import 'package:lama/pages/preparation/main.dart';
+
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class SignInPage extends StatefulWidget {
@@ -117,10 +119,10 @@ class _EmailPasswordFormState extends State<_EmailPasswordForm> {
       ))
           .user;
 
-      // TODO 画面遷移
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("ようこそ ${user.email}"),
-      ));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+            builder: (_) => PreparationMainPage(user: user)),
+      );
     } catch (e) {
       Scaffold.of(context).showSnackBar(SnackBar(
         content: Text('ログインに失敗しました'),
