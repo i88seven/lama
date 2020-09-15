@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:lama/pages/preparation/room/wait.dart';
 
 class RoomCreatePage extends StatefulWidget {
   final String title = '部屋の作成';
@@ -104,10 +105,19 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
         _roomIdController.text: {
           'hostUid': user.uid,
           'hostName': myName,
+          'members': [
+            {'uid': user.uid, 'name': myName}
+          ]
         }
       });
 
-      // TODO 画面遷移
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+            builder: (_) => RoomWaitPage(
+                  user: user,
+                  roomId: _roomIdController.text,
+                )),
+      );
     } catch (e) {}
   }
 }
