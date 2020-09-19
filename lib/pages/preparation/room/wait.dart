@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:lama/components/member.dart';
 
 class RoomWaitPage extends StatefulWidget {
   final String title = '待機中...';
@@ -15,20 +16,39 @@ class RoomWaitPage extends StatefulWidget {
 
 class _RoomWaitPageState extends State<RoomWaitPage> {
   DatabaseReference _roomRef;
-  List<dynamic> _memberList = [];
+  List<Member> _memberList = [];
 
   int get memberCount {
     return _memberList.length;
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    _memberList = [];
     _roomRef = FirebaseDatabase.instance
         .reference()
         .child('preparationRooms')
         .child(widget.roomId);
     _roomRef.onChildChanged.listen(_onChangeMember);
+    List<dynamic> snapshotMembers;
+    _roomRef.once().then((DataSnapshot snapshot) {
+      snapshotMembers = List<dynamic>.from(snapshot.value['members'] ?? []);
+      snapshotMembers.forEach((snapshotMember) {
+        print(snapshotMember);
+        Member member = Member(
+          uid: snapshotMember['uid'],
+          name: snapshotMember['name'],
+        );
+        setState(() {
+          _memberList.add(member);
+        });
+      });
+    });
+    super.initState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -43,7 +63,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
               physics: NeverScrollableScrollPhysics(),
               itemBuilder: (BuildContext context, index) {
                 return ListTile(
-                  title: Text(_memberList[index]['name']),
+                  title: Text(_memberList[index].name),
                 );
               },
               itemCount: memberCount,
@@ -65,10 +85,17 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   }
 
   void _onChangeMember(Event e) {
-    print(e.snapshot.value);
-    setState(() {
-      _memberList = List<dynamic>.from(e.snapshot.value ?? []);
-      print(_memberList);
+    List<dynamic> snapshotMembers =
+        List<dynamic>.from(e.snapshot.value['members'] ?? []);
+    snapshotMembers.forEach((snapshotMember) {
+      print(snapshotMember);
+      Member member = Member(
+        uid: snapshotMember['uid'],
+        name: snapshotMember['name'],
+      );
+      setState(() {
+        _memberList.add(member);
+      });
     });
   }
 }
