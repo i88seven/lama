@@ -101,14 +101,15 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
     try {
       String myName = 'test'; // TODO localstorage から取得
       // TODO すでに存在していて、自分以外が作っていたらエラー
-      _databaseReference.child('preparationRooms').set({
-        _roomIdController.text: {
-          'hostUid': user.uid,
-          'hostName': myName,
-          'members': [
-            {'uid': user.uid, 'name': myName}
-          ]
-        }
+      _databaseReference
+          .child('preparationRooms')
+          .child(_roomIdController.text)
+          .set({
+        'hostUid': user.uid,
+        'hostName': myName,
+        'members': [
+          {'uid': user.uid, 'name': myName}
+        ]
       });
 
       Navigator.of(context).push(
