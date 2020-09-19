@@ -107,9 +107,7 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
           .set({
         'hostUid': user.uid,
         'hostName': myName,
-        'members': [
-          {'uid': user.uid, 'name': myName}
-        ]
+        'members': {user.uid: myName}
       });
 
       Navigator.of(context).push(

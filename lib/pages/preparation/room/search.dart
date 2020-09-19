@@ -134,8 +134,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
   void _participateGame({roomId: String, user: User}) {
     try {
       String myName = 'participant'; // TODO localstorage から取得
-      _roomRef.child(roomId).child('members').child('1') // TODO List にならない
-          .set({'uid': user.uid, 'name': myName});
+      _roomRef.child(roomId).child('members').child(user.uid).set(myName);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(

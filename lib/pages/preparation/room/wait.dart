@@ -30,15 +30,11 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         .child('preparationRooms')
         .child(widget.roomId);
     _roomRef.onChildChanged.listen(_onChangeMember);
-    List<dynamic> snapshotMembers;
+    Map snapshotMembers;
     _roomRef.once().then((DataSnapshot snapshot) {
-      snapshotMembers = List<dynamic>.from(snapshot.value['members'] ?? []);
-      snapshotMembers.forEach((snapshotMember) {
-        print(snapshotMember);
-        Member member = Member(
-          uid: snapshotMember['uid'],
-          name: snapshotMember['name'],
-        );
+      snapshotMembers = Map.from(snapshot.value['members'] ?? {});
+      snapshotMembers.forEach((uid, name) {
+        Member member = Member(uid: uid, name: name);
         setState(() {
           _memberList.add(member);
         });
@@ -85,14 +81,9 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   }
 
   void _onChangeMember(Event e) {
-    List<dynamic> snapshotMembers =
-        List<dynamic>.from(e.snapshot.value['members'] ?? []);
-    snapshotMembers.forEach((snapshotMember) {
-      print(snapshotMember);
-      Member member = Member(
-        uid: snapshotMember['uid'],
-        name: snapshotMember['name'],
-      );
+    Map snapshotMembers = Map.from(e.snapshot.value['members'] ?? {});
+    snapshotMembers.forEach((uid, name) {
+      Member member = Member(uid: uid, name: name);
       setState(() {
         _memberList.add(member);
       });
