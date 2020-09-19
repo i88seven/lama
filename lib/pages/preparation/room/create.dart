@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:lama/pages/preparation/room/wait.dart';
 
 class RoomCreatePage extends StatefulWidget {
@@ -53,6 +54,7 @@ class _RoomCreateForm extends StatefulWidget {
 class _RoomCreateFormState extends State<_RoomCreateForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
+  final LocalStorage _storage = new LocalStorage('lama_game');
   DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
 
   @override
@@ -99,7 +101,8 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
 
   void _createRoom(User user) async {
     try {
-      String myName = 'test'; // TODO localstorage から取得
+      String myName = _storage.getItem('myName') ?? '';
+      // TODO myName 取得できなかったらエラー
       // TODO すでに存在していて、自分以外が作っていたらエラー
       _databaseReference
           .child('preparationRooms')

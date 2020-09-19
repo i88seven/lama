@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:localstorage/localstorage.dart';
+
 import 'package:lama/components/member.dart';
 import 'package:lama/pages/preparation/room/wait.dart';
 
@@ -16,6 +18,7 @@ class RoomSearchPage extends StatefulWidget {
 
 class _RoomSearchPageState extends State<RoomSearchPage> {
   DatabaseReference _roomRef;
+  final LocalStorage _storage = new LocalStorage('lama_game');
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
   String _roomId;
@@ -133,7 +136,8 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
 
   void _participateGame({roomId: String, user: User}) {
     try {
-      String myName = 'participant'; // TODO localstorage から取得
+      String myName = _storage.getItem('myName') ?? '';
+      // TODO myName 取得できなかったらエラー
       _roomRef.child(roomId).child('members').child(user.uid).set(myName);
 
       Navigator.of(context).push(

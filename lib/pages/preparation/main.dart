@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:localstorage/localstorage.dart';
+
 import 'package:lama/pages/preparation/room/create.dart';
 import 'package:lama/pages/preparation/room/search.dart';
 
@@ -52,7 +54,14 @@ class _PreparationMainForm extends StatefulWidget {
 
 class _PreparationMainFormState extends State<_PreparationMainForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final LocalStorage _storage = new LocalStorage('lama_game');
   final TextEditingController _myNameController = TextEditingController();
+
+  @override
+  void initState() {
+    _myNameController.text = _storage.getItem('myName');
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +119,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
 
   void _createRoom(User user) async {
     try {
-      // TODO localstorage に登録
+      _storage.setItem('myName', _myNameController.text);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => RoomCreatePage(user: user)),
@@ -120,7 +129,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
 
   void _searchRoom(User user) async {
     try {
-      // TODO localstorage に登録
+      _storage.setItem('myName', _myNameController.text);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => RoomSearchPage(user: user)),
