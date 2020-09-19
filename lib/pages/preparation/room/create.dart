@@ -58,6 +58,13 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
   DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
 
   @override
+  void initState() {
+    print(_storage.getItem('myRoomId'));
+    _roomIdController.text = _storage.getItem('myRoomId');
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,
@@ -112,6 +119,7 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
         'hostName': myName,
         'members': {user.uid: myName}
       });
+      _storage.setItem('myRoomId', _roomIdController.text);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(

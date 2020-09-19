@@ -59,6 +59,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
 
   @override
   void initState() {
+    // TODO セットされない
     _myNameController.text = _storage.getItem('myName');
     super.initState();
   }
