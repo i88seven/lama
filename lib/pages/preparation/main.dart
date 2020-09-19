@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lama/pages/preparation/room/create.dart';
+import 'package:lama/pages/preparation/room/search.dart';
 
 class PreparationMainPage extends StatefulWidget {
   final String title = 'Lama';
@@ -90,7 +91,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
                     child: Text('部屋を探す'),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
-                        _searchRoom();
+                        _searchRoom(widget.user);
                       }
                     },
                   ),
@@ -117,9 +118,13 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
     } catch (e) {}
   }
 
-  void _searchRoom() async {
+  void _searchRoom(User user) async {
     try {
-      // TODO 画面遷移
+      // TODO localstorage に登録
+
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => RoomSearchPage(user: user)),
+      );
     } catch (e) {}
   }
 }
