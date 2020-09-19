@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_signin_button/button_builder.dart';
 
-import 'package:lama/lama_game.dart';
 import 'package:lama/login/register_page.dart';
 import 'package:lama/login/signin_page.dart';
 
@@ -16,9 +15,6 @@ Future<void> main() async {
   ]);
   await Firebase.initializeApp();
   runApp(AuthExampleApp());
-//  final game = LamaGame();
-
-//  runApp(game.widget);
 }
 
 class AuthExampleApp extends StatelessWidget {

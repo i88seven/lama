@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:lama/lama_game.dart';
 import 'package:lama/components/member.dart';
 
 class RoomWaitPage extends StatefulWidget {
@@ -70,7 +71,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
               child: RaisedButton(
                 child: Text("$memberCount 人で始める"),
                 onPressed: () async {
-                  _startGame(widget.user);
+                  _startGame();
                 },
               ),
             ),
@@ -89,12 +90,18 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       });
     });
   }
-}
 
-void _startGame(User user) async {
-  try {
-    // TODO 待機部屋を削除
+  void _startGame() async {
+    try {
+      Size screenSize = MediaQuery.of(context).size;
+      final game = LamaGame(
+          user: widget.user, roomId: widget.roomId, screenSize: screenSize);
+      await game.initialize();
+      _roomRef.remove();
 
-    // TODO 画面遷移
-  } catch (e) {}
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => game.widget),
+      );
+    } catch (e) {}
+  }
 }

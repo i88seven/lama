@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
@@ -17,7 +18,8 @@ import 'package:lama/components/pass_button.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
-  bool isReady = true;
+  User user;
+  String roomId;
   bool isReadyGame = true;
   List<String> _playerNames;
   List<GamePlayer> _gamePlayers;
@@ -29,8 +31,7 @@ class LamaGame extends BaseGame with TapDetector {
   math.Random _rand;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
-  String hostName = 'test0'; // TODO
-  String myName; // TODO
+  String _hostName; // TODO uid に変更
   int myOrder;
   int currentOrder;
   PassButton _passButton;
@@ -39,10 +40,9 @@ class LamaGame extends BaseGame with TapDetector {
     return _playerNames.length;
   }
 
-  LamaGame() {
+  LamaGame({this.user, this.roomId, this.screenSize}) {
     _databaseReference = FirebaseDatabase.instance.reference();
-    _gameRef = _databaseReference.child(hostName);
-    _gameRef.keepSynced(true);
+    _hostName = '';
     _rand = math.Random();
     _playerNames = [];
     _gamePlayers = [];
@@ -50,16 +50,25 @@ class LamaGame extends BaseGame with TapDetector {
     _othersHands = [];
     _trashes = Trashes(this);
     _stocks = Stocks(this);
-
-    _gameRef.onChildChanged.listen(_onChange);
   }
 
-  void initialize() {
-    // TODO
-    _playerNames = ['test0', 'test1', 'test2', 'test3'];
+  Future<void> initialize() async {
+    DatabaseReference roomRef =
+        _databaseReference.child('preparationRooms').child(this.roomId);
+    DataSnapshot roomSnapshot = await roomRef.once();
+    _hostName = roomSnapshot.value['hostUid'];
+    _gameRef = _databaseReference.child(_hostName);
+    _gameRef.keepSynced(true);
+    _gameRef.onChildChanged.listen(_onChange);
+
+    Map snapshotMembers = Map.from(roomSnapshot.value['members'] ?? {});
+    snapshotMembers.forEach((uid, name) {
+      // TODO name を考慮
+      _playerNames.add(uid);
+    });
     _playerNames.shuffle();
     _playerNames.asMap().forEach((index, playerName) {
-      if (playerName == myName) {
+      if (playerName == this.user.uid) {
         this.myOrder = index;
       }
     });
@@ -68,7 +77,7 @@ class LamaGame extends BaseGame with TapDetector {
         this,
         playerName,
         (index - this.myOrder - 1) % this.playerCount,
-        playerName == this.myName,
+        playerName == this.user.uid,
       );
       _gamePlayers.add(gamePlayer);
     });
@@ -113,14 +122,14 @@ class LamaGame extends BaseGame with TapDetector {
       // players の子での initialize
       if (_gamePlayers.length == 0) {
         this.myOrder = e.snapshot.value
-            .indexWhere((gamePlayer) => gamePlayer['name'] == this.myName);
+            .indexWhere((gamePlayer) => gamePlayer['name'] == this.user.uid);
 
         e.snapshot.value.forEach((value) {
           GamePlayer gamePlayer = GamePlayer(
             this,
             value['name'],
             (_gamePlayers.length - this.myOrder - 1) % this.playerCount,
-            value['name'] == this.myName,
+            value['name'] == this.user.uid,
           );
           _gamePlayers.add(gamePlayer);
         });
@@ -133,7 +142,7 @@ class LamaGame extends BaseGame with TapDetector {
         );
       });
       if (_isGameEnd) {
-        if (myName == hostName) {
+        if (this.user.uid == _hostName) {
           _processRoundEnd();
           _deal();
         }
@@ -199,23 +208,9 @@ class LamaGame extends BaseGame with TapDetector {
 
   @override
   void onTapUp(details) {
-    if (isReady) {
-      isReady = false;
-      // TODO
-      if (details.localPosition.dx < 300) {
-        myName = 'test0';
-      } else {
-        myName = 'test1';
-      }
-      if (myName == hostName) {
-        this.initialize();
-      }
-      return;
-    }
-
     if (isReadyGame) {
       isReadyGame = false;
-      if (myName == hostName) {
+      if (this.user.uid == _hostName) {
         _deal();
       }
       _passButton = PassButton(false);
