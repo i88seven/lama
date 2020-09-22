@@ -3,7 +3,7 @@ import 'package:lama/components/back_card.dart';
 import 'package:lama/constants/card_state.dart';
 
 class Stocks {
-  List<int> numbers = [];
+  List<int> numbers = [0];
   final LamaGame game;
 
   Stocks(this.game);
