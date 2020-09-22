@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:localstorage/localstorage.dart';
+
 import 'package:lama/lama_game.dart';
 import 'package:lama/components/member.dart';
 
 class RoomWaitPage extends StatefulWidget {
   String title = '待機中...';
-  final User user;
   final String roomId;
 
-  RoomWaitPage({this.user, this.roomId});
+  RoomWaitPage({this.roomId});
 
   @override
   State<StatefulWidget> createState() => _RoomWaitPageState();
@@ -19,13 +19,15 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   DatabaseReference _roomRef;
   List<Member> _memberList = [];
   Member _hostMember;
+  LocalStorage _storage = LocalStorage('lama_game');
+  String _myUid = '';
 
   int get memberCount {
     return _memberList.length;
   }
 
   bool get _isHost {
-    return _hostMember != null && widget.user.uid == _hostMember.uid;
+    return _hostMember != null && _myUid == _hostMember.uid;
   }
 
   @override
@@ -53,6 +55,11 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       });
     });
     super.initState();
+
+    Future(() async {
+      await _storage.ready;
+      _myUid = _storage.getItem('myUid');
+    });
   }
 
   @override
@@ -117,8 +124,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   void _startGame() async {
     try {
       Size screenSize = MediaQuery.of(context).size;
-      final game = LamaGame(
-          user: widget.user, roomId: widget.roomId, screenSize: screenSize);
+      final game = LamaGame(roomId: widget.roomId, screenSize: screenSize);
       if (_isHost) {
         await game.initializeHost();
         _roomRef.remove();

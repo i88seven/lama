@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/components/member.dart';
 import 'package:lama/components/game_player.dart';
@@ -19,7 +19,7 @@ import 'package:lama/components/pass_button.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
-  User user;
+  String _myUid;
   String roomId;
   bool isReadyGame = true;
   List<Member> _members;
@@ -41,7 +41,9 @@ class LamaGame extends BaseGame with TapDetector {
     return _members.length;
   }
 
-  LamaGame({this.user, this.roomId, this.screenSize}) {
+  LamaGame({this.roomId, this.screenSize}) {
+    LocalStorage storage = LocalStorage('lama_game');
+    _myUid = storage.getItem('myUid');
     _databaseReference = FirebaseDatabase.instance.reference();
     _hostUid = '';
     _rand = math.Random();
@@ -71,7 +73,7 @@ class LamaGame extends BaseGame with TapDetector {
     });
     _members.shuffle();
     _members.asMap().forEach((index, member) {
-      if (member.uid == this.user.uid) {
+      if (member.uid == _myUid) {
         this.myOrder = index;
       }
     });
@@ -81,7 +83,7 @@ class LamaGame extends BaseGame with TapDetector {
         member.uid,
         member.name,
         (index - this.myOrder - 1) % this.playerCount,
-        member.name == this.user.uid,
+        member.uid == _myUid,
       );
       _gamePlayers.add(gamePlayer);
     });
@@ -104,7 +106,7 @@ class LamaGame extends BaseGame with TapDetector {
     snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
       String uid = snapshotPlayer['uid'];
       String name = snapshotPlayer['name'];
-      if (uid == this.user.uid) {
+      if (uid == _myUid) {
         this.myOrder = index;
       }
       Member member = Member(uid: uid, name: name);
@@ -114,7 +116,7 @@ class LamaGame extends BaseGame with TapDetector {
         uid,
         name,
         (index - this.myOrder - 1) % this.playerCount,
-        uid == this.user.uid,
+        uid == _myUid,
       );
       _gamePlayers.add(gamePlayer);
     });
@@ -156,7 +158,7 @@ class LamaGame extends BaseGame with TapDetector {
       // players の子での initialize
       if (_gamePlayers.length == 0) {
         this.myOrder = e.snapshot.value
-            .indexWhere((gamePlayer) => gamePlayer['uid'] == this.user.uid);
+            .indexWhere((gamePlayer) => gamePlayer['uid'] == _myUid);
 
         e.snapshot.value.forEach((value) {
           GamePlayer gamePlayer = GamePlayer(
@@ -164,7 +166,7 @@ class LamaGame extends BaseGame with TapDetector {
             value['uid'],
             value['name'],
             (_gamePlayers.length - this.myOrder - 1) % this.playerCount,
-            value['uid'] == this.user.uid,
+            value['uid'] == _myUid,
           );
           _gamePlayers.add(gamePlayer);
         });
@@ -177,7 +179,7 @@ class LamaGame extends BaseGame with TapDetector {
         );
       });
       if (_isGameEnd) {
-        if (this.user.uid == _hostUid) {
+        if (_myUid == _hostUid) {
           _processRoundEnd();
           _deal();
         }
@@ -246,7 +248,7 @@ class LamaGame extends BaseGame with TapDetector {
   void onTapUp(details) {
     if (isReadyGame) {
       isReadyGame = false;
-      if (this.user.uid == _hostUid) {
+      if (_myUid == _hostUid) {
         _deal();
       }
     }

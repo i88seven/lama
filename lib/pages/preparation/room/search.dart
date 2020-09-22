@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:localstorage/localstorage.dart';
 
@@ -8,9 +7,6 @@ import 'package:lama/pages/preparation/room/wait.dart';
 
 class RoomSearchPage extends StatefulWidget {
   final String title = '部屋を検索';
-  final User user;
-
-  RoomSearchPage({this.user});
 
   @override
   State<StatefulWidget> createState() => _RoomSearchPageState();
@@ -21,6 +17,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
   final LocalStorage _storage = new LocalStorage('lama_game');
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
+  String _myUid = '';
   String _roomId;
   Member _host;
 
@@ -32,6 +29,11 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
   void initState() {
     _roomRef = FirebaseDatabase.instance.reference().child('preparationRooms');
     super.initState();
+
+    Future(() async {
+      await _storage.ready;
+      _myUid = _storage.getItem('myUid');
+    });
   }
 
   @override
@@ -102,7 +104,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                 child: RaisedButton(
                   child: Text('入る'),
                   onPressed: () async {
-                    _participateGame(roomId: _roomId, user: widget.user);
+                    _participateGame(roomId: _roomId);
                   },
                 ),
               ),
@@ -134,18 +136,14 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
     } catch (e) {}
   }
 
-  void _participateGame({roomId: String, user: User}) {
+  void _participateGame({roomId: String}) {
     try {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
-      _roomRef.child(roomId).child('members').child(user.uid).set(myName);
+      _roomRef.child(roomId).child('members').child(_myUid).set(myName);
 
       Navigator.of(context).push(
-        MaterialPageRoute<void>(
-            builder: (_) => RoomWaitPage(
-                  user: user,
-                  roomId: roomId,
-                )),
+        MaterialPageRoute<void>(builder: (_) => RoomWaitPage(roomId: roomId)),
       );
     } catch (e) {}
   }

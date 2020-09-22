@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:lama/pages/preparation/room/wait.dart';
 
 class RoomCreatePage extends StatefulWidget {
   final String title = '部屋の作成';
-  final User user;
-
-  RoomCreatePage({this.user});
 
   @override
   State<StatefulWidget> createState() => _RoomCreatePageState();
 }
 
 class _RoomCreatePageState extends State<RoomCreatePage> {
+  LocalStorage _storage = LocalStorage('lama_game');
+  String _myUid = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future(() async {
+      await _storage.ready;
+      _myUid = _storage.getItem('myUid');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,12 +38,12 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
             Container(
               padding: EdgeInsets.all(16),
               child: Text(
-                widget.user == null ? '' : widget.user.uid,
+                _myUid,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               alignment: Alignment.center,
             ),
-            _RoomCreateForm(user: widget.user),
+            _RoomCreateForm(),
           ],
         );
       }),
@@ -43,10 +52,6 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
 }
 
 class _RoomCreateForm extends StatefulWidget {
-  final User user;
-
-  _RoomCreateForm({this.user});
-
   @override
   State<StatefulWidget> createState() => _RoomCreateFormState();
 }
@@ -56,12 +61,17 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
   final TextEditingController _roomIdController = TextEditingController();
   final LocalStorage _storage = new LocalStorage('lama_game');
   DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
+  String _myUid;
 
   @override
   void initState() {
-    print(_storage.getItem('myRoomId'));
-    _roomIdController.text = _storage.getItem('myRoomId');
     super.initState();
+
+    Future(() async {
+      await _storage.ready;
+      _myUid = _storage.getItem('myUid');
+      _roomIdController.text = _storage.getItem('myRoomId');
+    });
   }
 
   @override
@@ -89,7 +99,7 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
                     child: Text('作成'),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
-                        _createRoom(widget.user);
+                        _createRoom();
                       }
                     },
                   ),
@@ -106,7 +116,7 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
     super.dispose();
   }
 
-  void _createRoom(User user) async {
+  void _createRoom() async {
     try {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
@@ -115,16 +125,15 @@ class _RoomCreateFormState extends State<_RoomCreateForm> {
           .child('preparationRooms')
           .child(_roomIdController.text)
           .set({
-        'hostUid': user.uid,
+        'hostUid': _myUid,
         'hostName': myName,
-        'members': {user.uid: myName}
+        'members': {_myUid: myName}
       });
       _storage.setItem('myRoomId', _roomIdController.text);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(
             builder: (_) => RoomWaitPage(
-                  user: user,
                   roomId: _roomIdController.text,
                 )),
       );

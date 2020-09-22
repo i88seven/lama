@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_signin_button/button_builder.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:localstorage/localstorage.dart';
 
-import 'package:lama/login/register_page.dart';
-import 'package:lama/login/signin_page.dart';
+import 'package:lama/pages/preparation/main.dart';
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,59 +16,21 @@ Future<void> main() async {
     DeviceOrientation.portraitUp, //縦固定
   ]);
   await Firebase.initializeApp();
-  runApp(AuthExampleApp());
+  UserCredential userCredential = await _auth.signInAnonymously();
+  LocalStorage storage = LocalStorage('lama_game');
+  await storage.ready;
+  storage.setItem('myUid', userCredential.user.uid);
+  runApp(LamaApp());
 }
 
-class AuthExampleApp extends StatelessWidget {
+class LamaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Firebase Example App',
+        title: 'Firebase Example App', // TODO
         theme: ThemeData.dark(),
         home: Scaffold(
-          body: AuthTypeSelector(),
+          body: PreparationMainPage(),
         ));
-  }
-}
-
-class AuthTypeSelector extends StatelessWidget {
-  void _pushPage(BuildContext context, Widget page) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => page),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Lama'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            child: SignInButtonBuilder(
-              icon: Icons.person_add,
-              backgroundColor: Colors.indigo,
-              text: 'アカウント登録',
-              onPressed: () => _pushPage(context, RegisterPage()),
-            ),
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.center,
-          ),
-          Container(
-            child: SignInButtonBuilder(
-              icon: Icons.verified_user,
-              backgroundColor: Colors.orange,
-              text: 'ログイン',
-              onPressed: () => _pushPage(context, SignInPage()),
-            ),
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.center,
-          ),
-        ],
-      ),
-    );
   }
 }

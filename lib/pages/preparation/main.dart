@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/pages/preparation/room/create.dart';
@@ -7,15 +6,25 @@ import 'package:lama/pages/preparation/room/search.dart';
 
 class PreparationMainPage extends StatefulWidget {
   final String title = 'Lama';
-  final User user;
-
-  PreparationMainPage({this.user});
 
   @override
   State<StatefulWidget> createState() => _PreparationMainPageState();
 }
 
 class _PreparationMainPageState extends State<PreparationMainPage> {
+  LocalStorage _storage = LocalStorage('lama_game');
+  String _myUid = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future(() async {
+      await _storage.ready;
+      _myUid = _storage.getItem('myUid');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,12 +39,12 @@ class _PreparationMainPageState extends State<PreparationMainPage> {
             Container(
               padding: EdgeInsets.all(16),
               child: Text(
-                widget.user == null ? '' : widget.user.uid,
+                _myUid,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               alignment: Alignment.center,
             ),
-            _PreparationMainForm(user: widget.user),
+            _PreparationMainForm(),
           ],
         );
       }),
@@ -44,10 +53,6 @@ class _PreparationMainPageState extends State<PreparationMainPage> {
 }
 
 class _PreparationMainForm extends StatefulWidget {
-  final User user;
-
-  _PreparationMainForm({this.user});
-
   @override
   State<StatefulWidget> createState() => _PreparationMainFormState();
 }
@@ -89,7 +94,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
                     child: Text('部屋を立てる'),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
-                        _createRoom(widget.user);
+                        _createRoom();
                       }
                     },
                   ),
@@ -101,7 +106,7 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
                     child: Text('部屋を探す'),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
-                        _searchRoom(widget.user);
+                        _searchRoom();
                       }
                     },
                   ),
@@ -118,22 +123,22 @@ class _PreparationMainFormState extends State<_PreparationMainForm> {
     super.dispose();
   }
 
-  void _createRoom(User user) async {
+  void _createRoom() async {
     try {
       _storage.setItem('myName', _myNameController.text);
 
       Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => RoomCreatePage(user: user)),
+        MaterialPageRoute<void>(builder: (_) => RoomCreatePage()),
       );
     } catch (e) {}
   }
 
-  void _searchRoom(User user) async {
+  void _searchRoom() async {
     try {
       _storage.setItem('myName', _myNameController.text);
 
       Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => RoomSearchPage(user: user)),
+        MaterialPageRoute<void>(builder: (_) => RoomSearchPage()),
       );
     } catch (e) {}
   }
