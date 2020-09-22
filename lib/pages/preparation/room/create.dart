@@ -11,6 +11,9 @@ class RoomCreatePage extends StatefulWidget {
 }
 
 class _RoomCreatePageState extends State<RoomCreatePage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _roomIdController = TextEditingController();
+  DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
   LocalStorage _storage = LocalStorage('lama_game');
   String _myUid = '';
 
@@ -21,6 +24,7 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
     Future(() async {
       await _storage.ready;
       _myUid = _storage.getItem('myUid');
+      _roomIdController.text = _storage.getItem('myRoomId');
     });
   }
 
@@ -43,71 +47,43 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
               ),
               alignment: Alignment.center,
             ),
-            _RoomCreateForm(),
+            Form(
+              key: _formKey,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _roomIdController,
+                        decoration: const InputDecoration(labelText: '部屋ID'),
+                        validator: (String value) {
+                          if (value.isEmpty) return '入力してください';
+                          return null;
+                        },
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        alignment: Alignment.center,
+                        child: RaisedButton(
+                          child: Text('作成'),
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              _createRoom();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         );
       }),
     );
-  }
-}
-
-class _RoomCreateForm extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _RoomCreateFormState();
-}
-
-class _RoomCreateFormState extends State<_RoomCreateForm> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _roomIdController = TextEditingController();
-  final LocalStorage _storage = new LocalStorage('lama_game');
-  DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
-  String _myUid;
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future(() async {
-      await _storage.ready;
-      _myUid = _storage.getItem('myUid');
-      _roomIdController.text = _storage.getItem('myRoomId');
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-        key: _formKey,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TextFormField(
-                  controller: _roomIdController,
-                  decoration: const InputDecoration(labelText: '部屋ID'),
-                  validator: (String value) {
-                    if (value.isEmpty) return '入力してください';
-                    return null;
-                  },
-                ),
-                Container(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  alignment: Alignment.center,
-                  child: RaisedButton(
-                    child: Text('作成'),
-                    onPressed: () async {
-                      if (_formKey.currentState.validate()) {
-                        _createRoom();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ));
   }
 
   @override
