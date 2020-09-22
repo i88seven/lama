@@ -154,11 +154,7 @@ class LamaGame extends BaseGame with TapDetector {
 
       _stocks.initialize(List<int>.from(e.snapshot.value['stocks'] ?? []));
       if (_isGameEnd) {
-        if (_myUid == _hostUid) {
-          await _processRoundEnd();
-          await _deal();
-        }
-        _addPassButton(disabled: false);
+        await _processRoundEnd();
         return;
       }
       // trashes が 0枚 になることはないが、念のため
@@ -197,11 +193,7 @@ class LamaGame extends BaseGame with TapDetector {
         }
       });
       if (_isGameEnd) {
-        if (_myUid == _hostUid) {
-          await _processRoundEnd();
-          await _deal();
-        }
-        _addPassButton(disabled: false);
+        await _processRoundEnd();
       }
       return;
     }
@@ -232,6 +224,14 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> _processRoundEnd() async {
+    if (_myUid == _hostUid) {
+      await _processRoundEndHost();
+      await _deal();
+    }
+    _addPassButton(disabled: false);
+  }
+
+  Future<void> _processRoundEndHost() async {
     _gamePlayers.asMap().forEach((index, gamePlayer) {
       int points;
       if (gamePlayer.isFinished) {
@@ -315,11 +315,7 @@ class LamaGame extends BaseGame with TapDetector {
     _hands.drawCard(drawNumber);
     await _setCardsAtDatabase();
     if (_isGameEnd) {
-      if (_myUid == _hostUid) {
-        await _processRoundEnd();
-        await _deal();
-      }
-      _addPassButton(disabled: false);
+      await _processRoundEnd();
       return;
     }
     await _turnEnd();
