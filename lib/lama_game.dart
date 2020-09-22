@@ -59,6 +59,7 @@ class LamaGame extends BaseGame with TapDetector {
     DataSnapshot roomSnapshot = await roomRef.once();
     _hostUid = roomSnapshot.value['hostUid'];
     _gameRef = _databaseReference.child(_hostUid);
+    await _gameRef.remove();
     _gameRef.keepSynced(true);
     _gameRef.onChildChanged.listen(_onChange);
 
@@ -91,9 +92,6 @@ class LamaGame extends BaseGame with TapDetector {
       OtherHands otherHands = OtherHands(this, i);
       _othersHands.add(otherHands);
     }
-
-    _currentOrder = 0;
-    await _gameRef.child('current').set(_currentOrder);
   }
 
   Future<void> initializeSlave({hostUid: String}) async {
@@ -101,6 +99,7 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef = _databaseReference.child(_hostUid);
     _gameRef.keepSynced(true);
     _gameRef.onChildChanged.listen(_onChange);
+    _gameRef.onChildAdded.listen(_onChange);
 
     DataSnapshot gameSnapShot = await _gameRef.once();
     List snapshotPlayers = List.from(gameSnapShot.value['players'] ?? []);
@@ -130,7 +129,6 @@ class LamaGame extends BaseGame with TapDetector {
       _othersHands.add(otherHands);
     }
 
-    _currentOrder = gameSnapShot.value['current'];
     _isReadyGame = true;
   }
 
@@ -158,6 +156,9 @@ class LamaGame extends BaseGame with TapDetector {
       return;
     }
     if (e.snapshot.key == 'current') {
+      if (_currentOrder == null) {
+        _addPassButton(disabled: false);
+      }
       _currentOrder = e.snapshot.value;
       return;
     }
@@ -215,8 +216,10 @@ class LamaGame extends BaseGame with TapDetector {
     });
     _stocks.initialize(stocks);
     _trashes.initialize(trashes);
-
     await _setCardsAtDatabase();
+
+    _currentOrder = 0;
+    await _gameRef.child('current').set(_currentOrder);
 
     _addPassButton(disabled: false);
   }
