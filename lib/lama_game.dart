@@ -247,6 +247,8 @@ class LamaGame extends BaseGame with TapDetector {
 
       gamePlayer.newRound();
     });
+    // _isGameEnd の状態を一旦 False にしないと何度も得点が加算される
+    _stocks.initialize([0]);
     await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
