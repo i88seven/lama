@@ -87,12 +87,12 @@ class LamaGame extends BaseGame with TapDetector {
       );
       _gamePlayers.add(gamePlayer);
     });
-    _gameRef
+    await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
 
     this.currentOrder = 0;
-    _gameRef.child('current').set(this.currentOrder);
+    await _gameRef.child('current').set(this.currentOrder);
   }
 
   Future<void> initializeSlave({hostUid: String}) async {
@@ -128,7 +128,7 @@ class LamaGame extends BaseGame with TapDetector {
     this.isReadyGame = false;
   }
 
-  void _onChange(Event e) {
+  Future<void> _onChange(Event e) async {
     if (e.snapshot.key == 'cards') {
       List<List<dynamic>> playersCards =
           List<List<dynamic>>.from(e.snapshot.value['players']);
@@ -183,8 +183,8 @@ class LamaGame extends BaseGame with TapDetector {
       });
       if (_isGameEnd) {
         if (_myUid == _hostUid) {
-          _processRoundEnd();
-          _deal();
+          await _processRoundEnd();
+          await _deal();
         }
         _addPassButton(disabled: false);
       }
@@ -192,7 +192,7 @@ class LamaGame extends BaseGame with TapDetector {
     }
   }
 
-  void _deal() {
+  Future<void> _deal() async {
     List<int> stocks = List<int>.generate(7 * 8, (int index) => index ~/ 8 + 1);
     stocks.shuffle();
     List<List<int>> playersCards = [];
@@ -216,10 +216,10 @@ class LamaGame extends BaseGame with TapDetector {
     _stocks.initialize(stocks);
     _trashes.initialize(trashes);
 
-    _setCardsAtDatabase();
+    await _setCardsAtDatabase();
   }
 
-  void _processRoundEnd() {
+  Future<void> _processRoundEnd() async {
     _gamePlayers.asMap().forEach((index, gamePlayer) {
       int points;
       if (index == this.myOrder) {
@@ -236,7 +236,7 @@ class LamaGame extends BaseGame with TapDetector {
 
       gamePlayer.newRound();
     });
-    _gameRef
+    await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
   }
@@ -248,11 +248,11 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   @override
-  void onTapUp(details) {
+  Future<void> onTapUp(details) async {
     if (isReadyGame) {
       isReadyGame = false;
       if (_myUid == _hostUid) {
-        _deal();
+        await _deal();
       }
     }
 
@@ -270,7 +270,8 @@ class LamaGame extends BaseGame with TapDetector {
       if (c is FrontCard) {
         if (c.toRect().overlaps(touchArea)) {
           if (c.state == CardState.Hand) {
-            if (_discard(c)) {
+            bool success = await _discard(c);
+            if (success) {
               break;
             }
           }
@@ -280,7 +281,7 @@ class LamaGame extends BaseGame with TapDetector {
       if (c is BackCard) {
         if (c.toRect().overlaps(touchArea)) {
           if (c.state == CardState.Stock && _canDraw) {
-            this.drawCard();
+            await this.drawCard();
             break;
           }
         }
@@ -288,59 +289,59 @@ class LamaGame extends BaseGame with TapDetector {
 
       if (c is PassButton) {
         if (c.toRect().overlaps(touchArea)) {
-          _pass();
+          await _pass();
           break;
         }
       }
     }
   }
 
-  void drawCard() {
+  Future<void> drawCard() async {
     int drawNumber = _stocks.drawCard();
     _hands.drawCard(drawNumber);
-    _setCardsAtDatabase();
-    _turnEnd();
+    await _setCardsAtDatabase();
+    await _turnEnd();
   }
 
-  bool _discard(FrontCard card) {
+  Future<bool> _discard(FrontCard card) async {
     int numberDiff = card.number - _trashes.numbers.last;
     if (numberDiff != 0 && numberDiff != 1 && numberDiff != -6) {
       return false;
     }
     _hands.discard(card);
     _trashes.add(card.number);
-    _setCardsAtDatabase();
-    _turnEnd();
+    await _setCardsAtDatabase();
+    await _turnEnd();
 
     if (_hands.numbers.length == 0) {
-      _finish();
+      await _finish();
     }
     return true;
   }
 
-  void _pass() {
+  Future<void> _pass() async {
     _gamePlayers[this.myOrder].pass();
-    _gameRef
+    await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
-    _turnEnd();
+    await _turnEnd();
 
     _addPassButton(disabled: true);
   }
 
-  void _turnEnd() {
+  Future<void> _turnEnd() async {
     int nextPlayerIndex = [
       ...(_gamePlayers.sublist(this.myOrder + 1)),
       ...(_gamePlayers.sublist(0, this.myOrder + 1))
     ].indexWhere((gamePlayer) => !gamePlayer.isPassed);
-    _gameRef
+    await _gameRef
         .child('current')
         .set((nextPlayerIndex + this.myOrder + 1) % this.playerCount);
   }
 
-  void _finish() {
+  Future<void> _finish() async {
     _gamePlayers[this.myOrder].finish();
-    _gameRef
+    await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
   }
@@ -359,12 +360,12 @@ class LamaGame extends BaseGame with TapDetector {
         _gamePlayers.where((gamePlayer) => !gamePlayer.isPassed).length > 1;
   }
 
-  void _setCardsAtDatabase() {
+  Future<void> _setCardsAtDatabase() async {
     List<List<int>> playersCards = [
       _hands.numbers,
       ...(_othersHands.map((otherHands) => otherHands.numbers))
     ];
-    _gameRef.child('cards').set({
+    await _gameRef.child('cards').set({
       'players': [
         ...(playersCards.sublist(this.playerCount - this.myOrder)),
         ...(playersCards.sublist(0, (this.playerCount - this.myOrder)))

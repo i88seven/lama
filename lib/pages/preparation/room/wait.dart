@@ -127,7 +127,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       final game = LamaGame(roomId: widget.roomId, screenSize: screenSize);
       if (_isHost) {
         await game.initializeHost();
-        _roomRef.remove();
+        await _roomRef.remove();
       } else {
         await game.initializeSlave(hostUid: _hostMember.uid);
       }
