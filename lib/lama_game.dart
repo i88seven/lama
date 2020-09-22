@@ -52,11 +52,7 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes = Trashes(this);
     _stocks = Stocks(this);
 
-    _passButton = PassButton(false);
-    this.add(_passButton
-      ..x = this.screenSize.width - 100
-      ..y = this.screenSize.height - 180);
-    return;
+    _addPassButton(disabled: false);
   }
 
   Future<void> initializeHost() async {
@@ -185,6 +181,7 @@ class LamaGame extends BaseGame with TapDetector {
           _processRoundEnd();
           _deal();
         }
+        _addPassButton(disabled: false);
       }
       return;
     }
@@ -323,11 +320,7 @@ class LamaGame extends BaseGame with TapDetector {
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
     _turnEnd();
 
-    this.markToRemove(_passButton);
-    _passButton = PassButton(true);
-    this.add(_passButton
-      ..x = this.screenSize.width - 100
-      ..y = this.screenSize.height - 180);
+    _addPassButton(disabled: true);
   }
 
   void _turnEnd() {
@@ -374,5 +367,15 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': _stocks.numbers,
       'trashes': _trashes.numbers,
     });
+  }
+
+  void _addPassButton({disabled: bool}) {
+    if (_passButton != null) {
+      this.markToRemove(_passButton);
+    }
+    _passButton = PassButton(disabled);
+    this.add(_passButton
+      ..x = this.screenSize.width - 100
+      ..y = this.screenSize.height - 180);
   }
 }
