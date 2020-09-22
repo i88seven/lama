@@ -5,7 +5,7 @@ import 'package:lama/lama_game.dart';
 import 'package:lama/components/member.dart';
 
 class RoomWaitPage extends StatefulWidget {
-  final String title = '待機中...';
+  String title = '待機中...';
   final User user;
   final String roomId;
 
@@ -26,6 +26,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
 
   @override
   void initState() {
+    widget.title = "${widget.roomId} 待機中...";
     _memberList = [];
     _roomRef = FirebaseDatabase.instance
         .reference()
