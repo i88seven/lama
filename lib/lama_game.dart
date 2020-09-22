@@ -149,6 +149,14 @@ class LamaGame extends BaseGame with TapDetector {
       });
 
       _stocks.initialize(List<int>.from(e.snapshot.value['stocks'] ?? []));
+      if (_isGameEnd) {
+        if (_myUid == _hostUid) {
+          await _processRoundEnd();
+          await _deal();
+        }
+        _addPassButton(disabled: false);
+        return;
+      }
       // trashes が 0枚 になることはないが、念のため
       _trashes.initialize(List<int>.from(e.snapshot.value['trashes'] ?? []));
       return;
@@ -303,6 +311,14 @@ class LamaGame extends BaseGame with TapDetector {
     int drawNumber = _stocks.drawCard();
     _hands.drawCard(drawNumber);
     await _setCardsAtDatabase();
+    if (_isGameEnd) {
+      if (_myUid == _hostUid) {
+        await _processRoundEnd();
+        await _deal();
+      }
+      _addPassButton(disabled: false);
+      return;
+    }
     await _turnEnd();
   }
 
@@ -350,10 +366,11 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   bool get _isGameEnd {
-    // 誰か上がってる || 全員パスしてる
+    // 誰か上がってる || 全員パスしてる || 山札がなくなった
     return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
             0 ||
-        _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1;
+        _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1 ||
+        _stocks.numbers.length == 0;
   }
 
   bool get _canDraw {
