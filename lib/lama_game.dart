@@ -22,6 +22,7 @@ class LamaGame extends BaseGame with TapDetector {
   String _myUid;
   String roomId;
   bool isReadyGame = true;
+  bool _isTapping = false;
   List<Member> _members;
   List<GamePlayer> _gamePlayers;
   Hands _hands;
@@ -268,11 +269,13 @@ class LamaGame extends BaseGame with TapDetector {
       if (_myUid == _hostUid) {
         await _deal();
       }
-    }
-
-    if (this.currentOrder != this.myOrder || _isGameEnd) {
       return;
     }
+
+    if (_isTapping || this.currentOrder != this.myOrder || _isGameEnd) {
+      return;
+    }
+    _isTapping = true;
 
     final touchArea = Rect.fromCenter(
       center: details.localPosition,
@@ -308,6 +311,7 @@ class LamaGame extends BaseGame with TapDetector {
         }
       }
     }
+    _isTapping = false;
   }
 
   Future<void> drawCard() async {
