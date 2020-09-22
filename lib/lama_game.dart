@@ -225,15 +225,15 @@ class LamaGame extends BaseGame with TapDetector {
   Future<void> _processRoundEnd() async {
     _gamePlayers.asMap().forEach((index, gamePlayer) {
       int points;
-      if (index == this.myOrder) {
-        points = _hands.points;
-      } else {
-        points =
-            _othersHands[(index - this.myOrder - 1) % this.playerCount].points;
-      }
-      if (points == 0) {
+      if (gamePlayer.isFinished) {
         gamePlayer.subtractPoints();
       } else {
+        if (index == this.myOrder) {
+          points = _hands.points;
+        } else {
+          points = _othersHands[(index - this.myOrder - 1) % this.playerCount]
+              .points;
+        }
         gamePlayer.addPoints(points);
       }
 
