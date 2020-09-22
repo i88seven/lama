@@ -21,7 +21,7 @@ import 'package:lama/constants/card_state.dart';
 class LamaGame extends BaseGame with TapDetector {
   String _myUid;
   String roomId;
-  bool isReadyGame = true;
+  bool isReadyGame = false;
   bool _isTapping = false;
   List<Member> _members;
   List<GamePlayer> _gamePlayers;
@@ -134,7 +134,7 @@ class LamaGame extends BaseGame with TapDetector {
     }
 
     this.currentOrder = gameSnapShot.value['current'];
-    this.isReadyGame = false;
+    this.isReadyGame = true;
   }
 
   Future<void> _onChange(Event e) async {
@@ -187,7 +187,7 @@ class LamaGame extends BaseGame with TapDetector {
           gamePlayer['isFinished'],
           gamePlayer['isPassed'],
         );
-        if (index == this.myOrder && !isReadyGame) {
+        if (index == this.myOrder && isReadyGame) {
           _addPassButton(disabled: gamePlayer['isPassed']);
         }
       });
@@ -264,8 +264,8 @@ class LamaGame extends BaseGame with TapDetector {
 
   @override
   Future<void> onTapUp(details) async {
-    if (isReadyGame) {
-      isReadyGame = false;
+    if (!isReadyGame) {
+      isReadyGame = true;
       if (_myUid == _hostUid) {
         await _deal();
       }
