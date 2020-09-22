@@ -33,6 +33,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
     Future(() async {
       await _storage.ready;
       _myUid = _storage.getItem('myUid');
+      _roomIdController.text = _storage.getItem('searchRoomId');
     });
   }
 
@@ -141,6 +142,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
       _roomRef.child(roomId).child('members').child(_myUid).set(myName);
+      _storage.setItem('searchRoomId', _roomIdController.text);
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => RoomWaitPage(roomId: roomId)),
