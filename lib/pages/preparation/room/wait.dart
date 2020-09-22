@@ -31,6 +31,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         .child('preparationRooms')
         .child(widget.roomId);
     _roomRef.onChildChanged.listen(_onChangeMember);
+    _roomRef.onChildRemoved.listen(_onRemoveRoom);
     Map snapshotMembers;
     _roomRef.once().then((DataSnapshot snapshot) {
       snapshotMembers = Map.from(snapshot.value['members'] ?? {});
@@ -82,7 +83,12 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   }
 
   void _onChangeMember(Event e) {
-    Map snapshotMembers = Map.from(e.snapshot.value['members'] ?? {});
+    if (e.snapshot.key != 'members') {
+      return;
+    }
+
+    Map snapshotMembers = Map.from(e.snapshot.value ?? {});
+    _memberList = [];
     snapshotMembers.forEach((uid, name) {
       Member member = Member(uid: uid, name: name);
       setState(() {
@@ -91,11 +97,18 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
     });
   }
 
+  void _onRemoveRoom(Event e) {
+    if (e.snapshot.key == 'members') {
+      _startGame();
+    }
+  }
+
   void _startGame() async {
     try {
       Size screenSize = MediaQuery.of(context).size;
       final game = LamaGame(
           user: widget.user, roomId: widget.roomId, screenSize: screenSize);
+      // TODO ホストのみの処理
       await game.initialize();
       _roomRef.remove();
 
