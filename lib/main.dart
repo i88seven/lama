@@ -27,7 +27,7 @@ class LamaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Firebase Example App', // TODO
+        title: 'Lama',
         theme: ThemeData.dark(),
         home: Scaffold(
           body: PreparationMainPage(),
