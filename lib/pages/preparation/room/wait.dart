@@ -18,6 +18,7 @@ class RoomWaitPage extends StatefulWidget {
 class _RoomWaitPageState extends State<RoomWaitPage> {
   DatabaseReference _roomRef;
   List<Member> _memberList = [];
+  Member _hostMember;
 
   int get memberCount {
     return _memberList.length;
@@ -34,6 +35,10 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
     _roomRef.onChildRemoved.listen(_onRemoveRoom);
     Map snapshotMembers;
     _roomRef.once().then((DataSnapshot snapshot) {
+      _hostMember = Member(
+        uid: snapshot.value['hostUid'],
+        name: snapshot.value['hostName'],
+      );
       snapshotMembers = Map.from(snapshot.value['members'] ?? {});
       snapshotMembers.forEach((uid, name) {
         Member member = Member(uid: uid, name: name);
@@ -108,9 +113,12 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       Size screenSize = MediaQuery.of(context).size;
       final game = LamaGame(
           user: widget.user, roomId: widget.roomId, screenSize: screenSize);
-      // TODO ホストのみの処理
-      await game.initialize();
-      _roomRef.remove();
+      if (widget.user.uid == _hostMember.uid) {
+        await game.initializeHost();
+        _roomRef.remove();
+      } else {
+        await game.initializeSlave(hostUid: _hostMember.uid);
+      }
 
       Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => game.widget),

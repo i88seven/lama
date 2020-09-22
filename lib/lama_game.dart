@@ -50,9 +50,15 @@ class LamaGame extends BaseGame with TapDetector {
     _othersHands = [];
     _trashes = Trashes(this);
     _stocks = Stocks(this);
+
+    _passButton = PassButton(false);
+    this.add(_passButton
+      ..x = this.screenSize.width - 100
+      ..y = this.screenSize.height - 180);
+    return;
   }
 
-  Future<void> initialize() async {
+  Future<void> initializeHost() async {
     DatabaseReference roomRef =
         _databaseReference.child('preparationRooms').child(this.roomId);
     DataSnapshot roomSnapshot = await roomRef.once();
@@ -87,6 +93,34 @@ class LamaGame extends BaseGame with TapDetector {
 
     this.currentOrder = 0;
     _gameRef.child('current').set(this.currentOrder);
+  }
+
+  Future<void> initializeSlave({hostUid: String}) async {
+    _hostName = hostUid;
+    _gameRef = _databaseReference.child(_hostName);
+    _gameRef.keepSynced(true);
+    _gameRef.onChildChanged.listen(_onChange);
+
+    DataSnapshot gameSnapShot = await _gameRef.once();
+    List snapshotPlayers = List.from(gameSnapShot.value['players'] ?? []);
+    snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
+      // TODO uid に変更
+      String playerName = snapshotPlayer['name'];
+      if (playerName == this.user.uid) {
+        this.myOrder = index;
+      }
+      _playerNames.add(playerName);
+      GamePlayer gamePlayer = GamePlayer(
+        this,
+        playerName,
+        (index - this.myOrder - 1) % this.playerCount,
+        playerName == this.user.uid,
+      );
+      _gamePlayers.add(gamePlayer);
+    });
+
+    this.currentOrder = gameSnapShot.value['current'];
+    this.isReadyGame = false;
   }
 
   void _onChange(Event e) {
@@ -213,11 +247,6 @@ class LamaGame extends BaseGame with TapDetector {
       if (this.user.uid == _hostName) {
         _deal();
       }
-      _passButton = PassButton(false);
-      this.add(_passButton
-        ..x = this.screenSize.width - 100
-        ..y = this.screenSize.height - 180);
-      return;
     }
 
     if (this.currentOrder != this.myOrder || _isGameEnd) {
