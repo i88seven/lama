@@ -7,10 +7,10 @@ import 'package:lama/constants/card_state.dart';
 class OtherHands {
   List<int> numbers = [];
   List<BackCard> _cardObjects = [];
-  final LamaGame game;
-  int order; // 自分から見て次の人が "0"
+  final LamaGame _game;
+  int _order; // 自分から見て次の人が "0"
 
-  OtherHands(this.game, this.order);
+  OtherHands(this._game, this._order);
 
   void initialize(List<int> numbers) {
     numbers.sort();
@@ -20,17 +20,17 @@ class OtherHands {
 
   void _render() {
     _cardObjects.forEach((cardObject) {
-      this.game.markToRemove(cardObject);
+      _game.markToRemove(cardObject);
     });
     _cardObjects = [];
     for (int i = 0; i < numbers.length; i++) {
       Position pos = Position(
-        this.game.screenSize.width / (this.game.playerCount - 1) * this.order +
+        _game.screenSize.width / (_game.playerCount - 1) * _order +
             i * BackCard.cardSize.width / 4,
         80,
       );
       BackCard cardObject = BackCard(CardState.Other);
-      this.game.add(cardObject
+      _game.add(cardObject
         ..x = pos.x
         ..y = pos.y);
       _cardObjects.add(cardObject);

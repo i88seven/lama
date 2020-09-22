@@ -4,13 +4,13 @@ import 'package:lama/constants/card_state.dart';
 
 class Stocks {
   List<int> numbers = [0];
-  final LamaGame game;
+  final LamaGame _game;
 
-  Stocks(this.game);
+  Stocks(this._game);
 
   void initialize(numbers) {
     this.numbers = numbers;
-    this.game.add(BackCard(CardState.Stock)
+    _game.add(BackCard(CardState.Stock)
       ..x = 200 / 2
       ..y = 500 / 2);
   }

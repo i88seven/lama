@@ -21,7 +21,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
   String _roomId;
   Member _host;
 
-  bool get hasRoom {
+  bool get _hasRoom {
     return _roomId != null && _host != null && _host.uid != null;
   }
 
@@ -83,7 +83,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                     ),
                   ),
                 )),
-            if (this.hasRoom)
+            if (this._hasRoom)
               ListView(
                 children: [
                   Text(
@@ -98,7 +98,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
               ),
-            if (this.hasRoom)
+            if (this._hasRoom)
               Container(
                 padding: const EdgeInsets.only(top: 16.0),
                 alignment: Alignment.center,

@@ -9,7 +9,7 @@ class GamePlayer {
   final LamaGame game;
   String uid;
   String name;
-  int points;
+  int _points;
   bool isFinished;
   bool isPassed;
   int displayOrder; // 自分から見て次の人が "0"
@@ -17,14 +17,14 @@ class GamePlayer {
   List<TextComponent> _textObjects = [];
 
   GamePlayer(this.game, this.uid, this.name, this.displayOrder, this.isMe) {
-    this.points = 0;
+    _points = 0;
     this.isFinished = false;
     this.isPassed = false;
     _render();
   }
 
   void set(int points, bool isFinished, bool isPassed) {
-    this.points = points;
+    _points = points;
     this.isFinished = isFinished;
     this.isPassed = isPassed;
     _render();
@@ -36,15 +36,15 @@ class GamePlayer {
   }
 
   void addPoints(int points) {
-    this.points += points;
+    _points += points;
     _render();
   }
 
   void subtractPoints() {
-    if (this.points > 9) {
-      this.points -= 10;
-    } else if (this.points > 0) {
-      this.points -= 1;
+    if (_points > 9) {
+      _points -= 10;
+    } else if (_points > 0) {
+      _points -= 1;
     }
     _render();
   }
@@ -72,7 +72,7 @@ class GamePlayer {
       0,
     );
     TextComponent textComponent = TextComponent(
-      "$name: $points",
+      "$name: $_points",
       config: TextConfig(color: BasicPalette.white.color),
     );
     this.game.add(textComponent
@@ -85,7 +85,7 @@ class GamePlayer {
     return {
       'uid': uid,
       'name': name,
-      'points': points,
+      'points': _points,
       'isFinished': isFinished,
       'isPassed': isPassed,
     };

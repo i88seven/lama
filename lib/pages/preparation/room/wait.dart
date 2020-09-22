@@ -22,7 +22,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   LocalStorage _storage = LocalStorage('lama_game');
   String _myUid = '';
 
-  int get memberCount {
+  int get _memberCount {
     return _memberList.length;
   }
 
@@ -81,14 +81,14 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
                   title: Text(_memberList[index].name),
                 );
               },
-              itemCount: memberCount,
+              itemCount: _memberCount,
             ),
             if (_isHost)
               Container(
                 padding: const EdgeInsets.only(top: 16.0),
                 alignment: Alignment.center,
                 child: RaisedButton(
-                  child: Text("$memberCount 人で始める"),
+                  child: Text("$_memberCount 人で始める"),
                   onPressed: () async {
                     _startGame();
                   },
@@ -124,7 +124,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   void _startGame() async {
     try {
       Size screenSize = MediaQuery.of(context).size;
-      final game = LamaGame(roomId: widget.roomId, screenSize: screenSize);
+      final game = LamaGame(widget.roomId, screenSize);
       if (_isHost) {
         await game.initializeHost();
         await _roomRef.remove();

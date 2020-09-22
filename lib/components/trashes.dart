@@ -4,9 +4,9 @@ import 'package:lama/constants/card_state.dart';
 
 class Trashes {
   List<int> numbers = [];
-  final LamaGame game;
+  final LamaGame _game;
 
-  Trashes(this.game);
+  Trashes(this._game);
 
   void initialize(List<int> numbers) {
     this.numbers = numbers;
@@ -19,7 +19,7 @@ class Trashes {
   }
 
   void _render(number) {
-    this.game.add(FrontCard(number, CardState.Trash)
+    _game.add(FrontCard(number, CardState.Trash)
       ..x = 400 / 2
       ..y = 500 / 2);
   }

@@ -7,9 +7,9 @@ import 'package:lama/constants/card_state.dart';
 class Hands {
   List<int> numbers = [];
   List<FrontCard> _cardObjects = [];
-  final LamaGame game;
+  final LamaGame _game;
 
-  Hands(this.game);
+  Hands(this._game);
 
   void initialize(List<int> numbers) {
     this.numbers = numbers;
@@ -30,16 +30,16 @@ class Hands {
 
   void _render() {
     _cardObjects.forEach((cardObject) {
-      this.game.markToRemove(cardObject);
+      _game.markToRemove(cardObject);
     });
     _cardObjects = [];
     this.numbers.asMap().forEach((index, number) {
       Position pos = Position(
         index * FrontCard.cardSize.width / 2,
-        this.game.screenSize.height - FrontCard.cardSize.height,
+        _game.screenSize.height - FrontCard.cardSize.height,
       );
       FrontCard cardObject = FrontCard(number, CardState.Hand);
-      this.game.add(cardObject
+      _game.add(cardObject
         ..x = pos.x
         ..y = pos.y);
       _cardObjects.add(cardObject);
