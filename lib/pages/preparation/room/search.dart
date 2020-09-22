@@ -50,37 +50,38 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
           scrollDirection: Axis.vertical,
           children: <Widget>[
             Form(
-                key: _formKey,
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        TextFormField(
-                          controller: _roomIdController,
-                          decoration: const InputDecoration(labelText: '部屋ID'),
-                          validator: (String value) {
-                            if (value.isEmpty) return '入力してください';
-                            return null;
+              key: _formKey,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _roomIdController,
+                        decoration: const InputDecoration(labelText: '部屋ID'),
+                        validator: (String value) {
+                          if (value.isEmpty) return '入力してください';
+                          return null;
+                        },
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        alignment: Alignment.center,
+                        child: RaisedButton(
+                          child: Text('検索'),
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              _searchRoom();
+                            }
                           },
                         ),
-                        Container(
-                          padding: const EdgeInsets.only(top: 16.0),
-                          alignment: Alignment.center,
-                          child: RaisedButton(
-                            child: Text('検索'),
-                            onPressed: () async {
-                              if (_formKey.currentState.validate()) {
-                                _searchRoom();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                )),
+                ),
+              ),
+            ),
             if (_isNoResult)
               ListView(
                 children: [
