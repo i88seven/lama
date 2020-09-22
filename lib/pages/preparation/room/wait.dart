@@ -24,6 +24,10 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
     return _memberList.length;
   }
 
+  bool get _isHost {
+    return _hostMember != null && widget.user.uid == _hostMember.uid;
+  }
+
   @override
   void initState() {
     widget.title = "${widget.roomId} 待機中...";
@@ -72,16 +76,17 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
               },
               itemCount: memberCount,
             ),
-            Container(
-              padding: const EdgeInsets.only(top: 16.0),
-              alignment: Alignment.center,
-              child: RaisedButton(
-                child: Text("$memberCount 人で始める"),
-                onPressed: () async {
-                  _startGame();
-                },
+            if (_isHost)
+              Container(
+                padding: const EdgeInsets.only(top: 16.0),
+                alignment: Alignment.center,
+                child: RaisedButton(
+                  child: Text("$memberCount 人で始める"),
+                  onPressed: () async {
+                    _startGame();
+                  },
+                ),
               ),
-            ),
           ],
         );
       }),
@@ -114,7 +119,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       Size screenSize = MediaQuery.of(context).size;
       final game = LamaGame(
           user: widget.user, roomId: widget.roomId, screenSize: screenSize);
-      if (widget.user.uid == _hostMember.uid) {
+      if (_isHost) {
         await game.initializeHost();
         _roomRef.remove();
       } else {
