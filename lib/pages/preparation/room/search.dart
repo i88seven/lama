@@ -20,6 +20,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
   String _myUid = '';
   String _roomId;
   Member _host;
+  bool _isNoResult = false;
 
   bool get _hasRoom {
     return _roomId != null && _host != null && _host.uid != null;
@@ -72,9 +73,6 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {
                                 _searchRoom();
-                                setState(() {
-                                  _searchRoom();
-                                });
                               }
                             },
                           ),
@@ -83,7 +81,18 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                     ),
                   ),
                 )),
-            if (this._hasRoom)
+            if (_isNoResult)
+              ListView(
+                children: [
+                  Text(
+                    '見つかりませんでした',
+                    style: TextStyle(fontSize: 18.0, color: Colors.yellow[300]),
+                  ),
+                ],
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+              ),
+            if (_hasRoom)
               ListView(
                 children: [
                   Text(
@@ -98,7 +107,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
               ),
-            if (this._hasRoom)
+            if (_hasRoom)
               Container(
                 padding: const EdgeInsets.only(top: 16.0),
                 alignment: Alignment.center,
@@ -125,15 +134,22 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
     try {
       DataSnapshot snapshot =
           await _roomRef.child(_roomIdController.text).once();
-      if (snapshot.value['hostUid'] != null) {
+      if (snapshot.value == null || snapshot.value['hostUid'] == null) {
         setState(() {
-          _roomId = _roomIdController.text;
-          _host = Member(
-            uid: snapshot.value['hostUid'],
-            name: snapshot.value['hostName'],
-          );
+          _roomId = null;
+          _host = null;
+          _isNoResult = true;
         });
+        return;
       }
+      setState(() {
+        _roomId = snapshot.key;
+        _host = Member(
+          uid: snapshot.value['hostUid'],
+          name: snapshot.value['hostName'],
+        );
+        _isNoResult = false;
+      });
     } catch (e) {}
   }
 
