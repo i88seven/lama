@@ -91,6 +91,11 @@ class LamaGame extends BaseGame with TapDetector {
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
 
+    for (int i = 0; i < this.playerCount - 1; i++) {
+      OtherHands otherHands = OtherHands(this, i);
+      _othersHands.add(otherHands);
+    }
+
     this.currentOrder = 0;
     await _gameRef.child('current').set(this.currentOrder);
   }
@@ -124,6 +129,11 @@ class LamaGame extends BaseGame with TapDetector {
       _gamePlayers.add(gamePlayer);
     });
 
+    for (int i = 0; i < this.playerCount - 1; i++) {
+      OtherHands otherHands = OtherHands(this, i);
+      _othersHands.add(otherHands);
+    }
+
     this.currentOrder = gameSnapShot.value['current'];
     this.isReadyGame = false;
   }
@@ -133,12 +143,6 @@ class LamaGame extends BaseGame with TapDetector {
       List<List<dynamic>> playersCards =
           List<List<dynamic>>.from(e.snapshot.value['players']);
 
-      if (_othersHands.length == 0) {
-        for (int i = 0; i < this.playerCount - 1; i++) {
-          OtherHands otherHands = OtherHands(this, i);
-          _othersHands.add(otherHands);
-        }
-      }
       playersCards.asMap().forEach((i, playerCards) {
         if (i == this.myOrder) {
           _hands.initialize(List<int>.from(playerCards ?? []));
@@ -214,14 +218,11 @@ class LamaGame extends BaseGame with TapDetector {
     List<int> trashes = stocks.sublist(0, 1);
     stocks.removeRange(0, 1);
 
-    _othersHands = [];
     playersCards.asMap().forEach((i, playerCards) {
       if (i == this.playerCount - 1) {
         _hands.initialize(playerCards);
       } else {
-        OtherHands otherHands = OtherHands(this, i);
-        otherHands.initialize(playerCards);
-        _othersHands.add(otherHands);
+        _othersHands[i].initialize(playerCards);
       }
     });
     _stocks.initialize(stocks);
