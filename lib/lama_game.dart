@@ -54,8 +54,6 @@ class LamaGame extends BaseGame with TapDetector {
     _othersHands = [];
     _trashes = Trashes(this);
     _stocks = Stocks(this);
-
-    _addPassButton(disabled: false);
   }
 
   Future<void> initializeHost() async {
@@ -189,7 +187,7 @@ class LamaGame extends BaseGame with TapDetector {
           gamePlayer['isFinished'],
           gamePlayer['isPassed'],
         );
-        if (index == this.myOrder) {
+        if (index == this.myOrder && !isReadyGame) {
           _addPassButton(disabled: gamePlayer['isPassed']);
         }
       });
@@ -222,6 +220,8 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes.initialize(trashes);
 
     await _setCardsAtDatabase();
+
+    _addPassButton(disabled: false);
   }
 
   Future<void> _processRoundEnd() async {
