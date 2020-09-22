@@ -7,6 +7,7 @@ import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'package:lama/components/member.dart';
 import 'package:lama/components/game_player.dart';
 import 'package:lama/components/hands.dart';
 import 'package:lama/components/other_hands.dart';
@@ -21,7 +22,7 @@ class LamaGame extends BaseGame with TapDetector {
   User user;
   String roomId;
   bool isReadyGame = true;
-  List<String> _playerNames;
+  List<Member> _members;
   List<GamePlayer> _gamePlayers;
   Hands _hands;
   List<OtherHands> _othersHands;
@@ -31,20 +32,20 @@ class LamaGame extends BaseGame with TapDetector {
   math.Random _rand;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
-  String _hostName; // TODO uid に変更
+  String _hostUid;
   int myOrder;
   int currentOrder;
   PassButton _passButton;
 
   int get playerCount {
-    return _playerNames.length;
+    return _members.length;
   }
 
   LamaGame({this.user, this.roomId, this.screenSize}) {
     _databaseReference = FirebaseDatabase.instance.reference();
-    _hostName = '';
+    _hostUid = '';
     _rand = math.Random();
-    _playerNames = [];
+    _members = [];
     _gamePlayers = [];
     _hands = Hands(this);
     _othersHands = [];
@@ -62,28 +63,29 @@ class LamaGame extends BaseGame with TapDetector {
     DatabaseReference roomRef =
         _databaseReference.child('preparationRooms').child(this.roomId);
     DataSnapshot roomSnapshot = await roomRef.once();
-    _hostName = roomSnapshot.value['hostUid'];
-    _gameRef = _databaseReference.child(_hostName);
+    _hostUid = roomSnapshot.value['hostUid'];
+    _gameRef = _databaseReference.child(_hostUid);
     _gameRef.keepSynced(true);
     _gameRef.onChildChanged.listen(_onChange);
 
     Map snapshotMembers = Map.from(roomSnapshot.value['members'] ?? {});
     snapshotMembers.forEach((uid, name) {
-      // TODO name を考慮
-      _playerNames.add(uid);
+      Member member = Member(uid: uid, name: name);
+      _members.add(member);
     });
-    _playerNames.shuffle();
-    _playerNames.asMap().forEach((index, playerName) {
-      if (playerName == this.user.uid) {
+    _members.shuffle();
+    _members.asMap().forEach((index, member) {
+      if (member.uid == this.user.uid) {
         this.myOrder = index;
       }
     });
-    _playerNames.asMap().forEach((index, playerName) {
+    _members.asMap().forEach((index, member) {
       GamePlayer gamePlayer = GamePlayer(
         this,
-        playerName,
+        member.uid,
+        member.name,
         (index - this.myOrder - 1) % this.playerCount,
-        playerName == this.user.uid,
+        member.name == this.user.uid,
       );
       _gamePlayers.add(gamePlayer);
     });
@@ -96,25 +98,27 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> initializeSlave({hostUid: String}) async {
-    _hostName = hostUid;
-    _gameRef = _databaseReference.child(_hostName);
+    _hostUid = hostUid;
+    _gameRef = _databaseReference.child(_hostUid);
     _gameRef.keepSynced(true);
     _gameRef.onChildChanged.listen(_onChange);
 
     DataSnapshot gameSnapShot = await _gameRef.once();
     List snapshotPlayers = List.from(gameSnapShot.value['players'] ?? []);
     snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
-      // TODO uid に変更
-      String playerName = snapshotPlayer['name'];
-      if (playerName == this.user.uid) {
+      String uid = snapshotPlayer['uid'];
+      String name = snapshotPlayer['name'];
+      if (uid == this.user.uid) {
         this.myOrder = index;
       }
-      _playerNames.add(playerName);
+      Member member = Member(uid: uid, name: name);
+      _members.add(member);
       GamePlayer gamePlayer = GamePlayer(
         this,
-        playerName,
+        uid,
+        name,
         (index - this.myOrder - 1) % this.playerCount,
-        playerName == this.user.uid,
+        uid == this.user.uid,
       );
       _gamePlayers.add(gamePlayer);
     });
@@ -156,14 +160,15 @@ class LamaGame extends BaseGame with TapDetector {
       // players の子での initialize
       if (_gamePlayers.length == 0) {
         this.myOrder = e.snapshot.value
-            .indexWhere((gamePlayer) => gamePlayer['name'] == this.user.uid);
+            .indexWhere((gamePlayer) => gamePlayer['uid'] == this.user.uid);
 
         e.snapshot.value.forEach((value) {
           GamePlayer gamePlayer = GamePlayer(
             this,
+            value['uid'],
             value['name'],
             (_gamePlayers.length - this.myOrder - 1) % this.playerCount,
-            value['name'] == this.user.uid,
+            value['uid'] == this.user.uid,
           );
           _gamePlayers.add(gamePlayer);
         });
@@ -176,7 +181,7 @@ class LamaGame extends BaseGame with TapDetector {
         );
       });
       if (_isGameEnd) {
-        if (this.user.uid == _hostName) {
+        if (this.user.uid == _hostUid) {
           _processRoundEnd();
           _deal();
         }
@@ -244,7 +249,7 @@ class LamaGame extends BaseGame with TapDetector {
   void onTapUp(details) {
     if (isReadyGame) {
       isReadyGame = false;
-      if (this.user.uid == _hostName) {
+      if (this.user.uid == _hostUid) {
         _deal();
       }
     }

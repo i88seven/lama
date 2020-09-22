@@ -7,6 +7,7 @@ import 'package:lama/lama_game.dart';
 
 class GamePlayer {
   final LamaGame game;
+  String uid;
   String name;
   int points;
   bool isFinished;
@@ -15,7 +16,7 @@ class GamePlayer {
   bool isMe;
   List<TextComponent> _textObjects = [];
 
-  GamePlayer(this.game, this.name, this.displayOrder, this.isMe) {
+  GamePlayer(this.game, this.uid, this.name, this.displayOrder, this.isMe) {
     this.points = 0;
     this.isFinished = false;
     this.isPassed = false;
@@ -82,6 +83,7 @@ class GamePlayer {
 
   toJson() {
     return {
+      'uid': uid,
       'name': name,
       'points': points,
       'isFinished': isFinished,
