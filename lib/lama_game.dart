@@ -166,13 +166,15 @@ class LamaGame extends BaseGame with TapDetector {
     }
     if (e.snapshot.key == 'players') {
       e.snapshot.value.asMap().forEach((index, gamePlayer) {
-        _gamePlayers[index].set(
-          gamePlayer['points'],
-          gamePlayer['isFinished'],
-          gamePlayer['isPassed'],
-        );
-        if (index == _myOrder && _isReadyGame) {
-          _addPassButton(disabled: gamePlayer['isPassed']);
+        if (_gamePlayers.length > 0) {
+          _gamePlayers[index].set(
+            gamePlayer['points'],
+            gamePlayer['isFinished'],
+            gamePlayer['isPassed'],
+          );
+          if (index == _myOrder && _isReadyGame) {
+            _addPassButton(disabled: gamePlayer['isPassed']);
+          }
         }
       });
       if (_isGameEnd) {
