@@ -7,6 +7,7 @@ import 'package:lama/constants/card_state.dart';
 class Hands {
   List<int> numbers = [];
   List<FrontCard> _cardObjects = [];
+  bool _isActive = false;
   final LamaGame _game;
 
   Hands(this._game);
@@ -14,17 +15,25 @@ class Hands {
   void initialize(List<int> numbers) {
     this.numbers = numbers;
     this.numbers.sort();
+    _isActive = false;
     _render();
   }
 
   void drawCard(number) {
     this.numbers.add(number);
     this.numbers.sort();
+    _isActive = false;
     _render();
   }
 
   void discard(FrontCard card) {
     this.numbers.remove(card.number);
+    _isActive = false;
+    _render();
+  }
+
+  void setActive(bool isActive) {
+    _isActive = isActive;
     _render();
   }
 
@@ -38,7 +47,10 @@ class Hands {
         index * FrontCard.cardSize.width / 2,
         _game.screenSize.height - FrontCard.cardSize.height,
       );
-      FrontCard cardObject = FrontCard(number, CardState.Hand);
+      int numberDiff = number - _game.trashNumber;
+      bool isActiveCard =
+          _isActive && (numberDiff == 0 || numberDiff == 1 || numberDiff == -6);
+      FrontCard cardObject = FrontCard(number, CardState.Hand, isActiveCard);
       _game.add(cardObject
         ..x = pos.x
         ..y = pos.y);

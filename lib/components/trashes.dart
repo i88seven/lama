@@ -19,7 +19,7 @@ class Trashes {
   }
 
   void _render(number) {
-    _game.add(FrontCard(number, CardState.Trash)
+    _game.add(FrontCard(number, CardState.Trash, false)
       ..x = 400 / 2
       ..y = 500 / 2);
   }

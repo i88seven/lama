@@ -13,10 +13,11 @@ class FrontCard extends PositionComponent {
   static const Size cardSize = Size(60, 100);
   final int number;
   final CardState state;
+  final active;
   double time = 0;
   int lightIntensity = 0;
 
-  FrontCard(this.number, this.state);
+  FrontCard(this.number, this.state, this.active);
 
   @override
   void render(Canvas c) {
@@ -26,7 +27,7 @@ class FrontCard extends PositionComponent {
   }
 
   renderCard(Canvas c, int number) {
-    int blue = 255 - lightIntensity;
+    int blue = this.active ? 255 - lightIntensity : 255;
     Color color = Color.fromARGB(255, 255, 255, blue);
     c.drawRect(Rect.fromLTWH(0, 0, cardSize.width, cardSize.height),
         Paint()..color = color);
@@ -52,6 +53,9 @@ class FrontCard extends PositionComponent {
 
   @override
   void update(double t) {
+    if (!this.active) {
+      return;
+    }
     time += t * 2;
     this.lightIntensity = ((sin(time) + 1) * 64).floor();
     super.update(t);

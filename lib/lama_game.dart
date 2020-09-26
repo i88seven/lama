@@ -137,6 +137,9 @@ class LamaGame extends BaseGame with TapDetector {
       List<List<dynamic>> playersCards =
           List<List<dynamic>>.from(e.snapshot.value['players']);
 
+      // hands の initialize の前に trash を initialize する
+      _trashes.initialize(List<int>.from(e.snapshot.value['trashes'] ?? []));
+
       playersCards.asMap().forEach((i, playerCards) {
         if (i == _myOrder) {
           _hands.initialize(List<int>.from(playerCards ?? []));
@@ -151,8 +154,6 @@ class LamaGame extends BaseGame with TapDetector {
         await _processRoundEnd();
         return;
       }
-      // trashes が 0枚 になることはないが、念のため
-      _trashes.initialize(List<int>.from(e.snapshot.value['trashes'] ?? []));
       return;
     }
     if (e.snapshot.key == 'current') {
@@ -160,6 +161,7 @@ class LamaGame extends BaseGame with TapDetector {
         _addPassButton(disabled: false);
       }
       _currentOrder = e.snapshot.value;
+      _hands.setActive(_currentOrder == _myOrder);
       return;
     }
     if (e.snapshot.key == 'players') {
@@ -203,6 +205,7 @@ class LamaGame extends BaseGame with TapDetector {
     await _setCardsAtDatabase();
 
     _currentOrder = 0;
+    _hands.setActive(_currentOrder == _myOrder);
     await _gameRef.child('current').set(_currentOrder);
 
     _addPassButton(disabled: false);
@@ -365,6 +368,10 @@ class LamaGame extends BaseGame with TapDetector {
     return !_gamePlayers[_myOrder].isPassed &&
         _stocks.numbers.length > 0 &&
         _gamePlayers.where((gamePlayer) => !gamePlayer.isPassed).length > 1;
+  }
+
+  int get trashNumber {
+    return _trashes.numbers.length > 0 ? _trashes.numbers.last : 0;
   }
 
   Future<void> _setCardsAtDatabase() async {
