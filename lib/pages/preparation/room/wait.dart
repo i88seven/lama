@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flame/flame.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:localstorage/localstorage.dart';
 
@@ -123,6 +124,9 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
 
   void _startGame() async {
     try {
+      Flame.images.loadAll(<String>[
+        'card-7.png',
+      ]);
       Size screenSize = MediaQuery.of(context).size;
       final game = LamaGame(widget.roomId, screenSize);
       if (_isHost) {
