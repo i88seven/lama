@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/anchor.dart';
@@ -12,6 +13,8 @@ class FrontCard extends PositionComponent {
   static const Size cardSize = Size(60, 100);
   final int number;
   final CardState state;
+  double time = 0;
+  int lightIntensity = 0;
 
   FrontCard(this.number, this.state);
 
@@ -23,8 +26,10 @@ class FrontCard extends PositionComponent {
   }
 
   renderCard(Canvas c, int number) {
+    int blue = 255 - lightIntensity;
+    Color color = Color.fromARGB(255, 255, 255, blue);
     c.drawRect(Rect.fromLTWH(0, 0, cardSize.width, cardSize.height),
-        BasicPalette.white.paint);
+        Paint()..color = color);
     final textStyle = TextStyle(
       color: Colors.green,
       fontSize: 30,
@@ -47,6 +52,8 @@ class FrontCard extends PositionComponent {
 
   @override
   void update(double t) {
+    time += t * 2;
+    this.lightIntensity = ((sin(time) + 1) * 64).floor();
     super.update(t);
   }
 
