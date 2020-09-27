@@ -224,6 +224,7 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes.initialize(trashes);
     await _setCardsAtDatabase();
 
+    // TODO 前のゲームで最後にプレイした人から始める
     _currentOrder = 0;
     _hands.setActive(_currentOrder == _myOrder);
     await _gameRef.child('current').set(_currentOrder);
@@ -404,12 +405,10 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   bool get _isRoundEnd {
-    // TODO 山札がなくなってもゲームはできる
-    // 誰か上がってる || 全員パスしてる || 山札がなくなった
+    // 誰か上がってる || 全員パスしてる
     return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
             0 ||
-        _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1 ||
-        _stocks.numbers.length == 0;
+        _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1;
   }
 
   bool get _isGameEnd {
