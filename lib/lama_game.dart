@@ -302,9 +302,10 @@ class LamaGame extends BaseGame with TapDetector {
       for (final c in components) {
         if (c is GameEndButton && c.toRect().contains(details.localPosition)) {
           _gameResult.remove();
-          this.onGameEnd();
+          await _gameEnd();
         }
       }
+      return;
     }
 
     if (_isTapping || _currentOrder != _myOrder || _isRoundEnd) {
@@ -439,5 +440,12 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': _stocks.numbers,
       'trashes': _trashes.numbers,
     });
+  }
+
+  Future<void> _gameEnd() async {
+    if (_myUid == _hostUid) {
+      await _gameRef.remove();
+    }
+    this.onGameEnd();
   }
 }
