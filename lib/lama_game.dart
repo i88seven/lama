@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:lama/components/game_end_button.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/components/member.dart';
@@ -291,6 +292,15 @@ class LamaGame extends BaseGame with TapDetector {
       return;
     }
 
+    if (_isGameEnd) {
+      for (final c in components) {
+        if (c is GameEndButton && c.toRect().contains(details.localPosition)) {
+          _gameResult.remove();
+          _gameEnd();
+        }
+      }
+    }
+
     if (_isTapping || _currentOrder != _myOrder || _isRoundEnd) {
       return;
     }
@@ -423,5 +433,9 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': _stocks.numbers,
       'trashes': _trashes.numbers,
     });
+  }
+
+  void _gameEnd() {
+    // TODO
   }
 }
