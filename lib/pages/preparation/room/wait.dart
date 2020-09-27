@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flame/flame.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:localstorage/localstorage.dart';
 
-import 'package:lama/pages/preparation/main.dart';
 import 'package:lama/lama_game.dart';
 import 'package:lama/components/member.dart';
 
@@ -19,6 +20,8 @@ class RoomWaitPage extends StatefulWidget {
 
 class _RoomWaitPageState extends State<RoomWaitPage> {
   DatabaseReference _roomRef;
+  StreamSubscription _changeSubscription;
+  StreamSubscription _removeSubscription;
   List<Member> _memberList = [];
   Member _hostMember;
   LocalStorage _storage = LocalStorage('lama_game');
@@ -40,8 +43,8 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         .reference()
         .child('preparationRooms')
         .child(widget.roomId);
-    _roomRef.onChildChanged.listen(_onChangeMember);
-    _roomRef.onChildRemoved.listen(_onRemoveRoom);
+    _changeSubscription = _roomRef.onChildChanged.listen(_onChangeMember);
+    _removeSubscription = _roomRef.onChildRemoved.listen(_onRemoveRoom);
     Map snapshotMembers;
     _roomRef.once().then((DataSnapshot snapshot) {
       _hostMember = Member(
@@ -100,6 +103,13 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         );
       }),
     );
+  }
+
+  @override
+  void dispose() {
+    _changeSubscription.cancel();
+    _removeSubscription.cancel();
+    super.dispose();
   }
 
   void _onChangeMember(Event e) {

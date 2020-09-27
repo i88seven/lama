@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
@@ -34,6 +35,7 @@ class LamaGame extends BaseGame with TapDetector {
   Size screenSize;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
+  List<StreamSubscription> _streams = [];
   String _hostUid;
   int _myOrder;
   int _currentOrder;
@@ -66,7 +68,7 @@ class LamaGame extends BaseGame with TapDetector {
     _gameRef = _databaseReference.child(_hostUid);
     await _gameRef.remove();
     _gameRef.keepSynced(true);
-    _gameRef.onChildChanged.listen(_onChange);
+    _streams.add(_gameRef.onChildChanged.listen(_onChange));
 
     Map snapshotMembers = Map.from(roomSnapshot.value['members'] ?? {});
     snapshotMembers.forEach((uid, name) {
@@ -103,8 +105,8 @@ class LamaGame extends BaseGame with TapDetector {
     _hostUid = hostUid;
     _gameRef = _databaseReference.child(_hostUid);
     _gameRef.keepSynced(true);
-    _gameRef.onChildChanged.listen(_onChange);
-    _gameRef.onChildAdded.listen(_onChange);
+    _streams.add(_gameRef.onChildChanged.listen(_onChange));
+    _streams.add(_gameRef.onChildAdded.listen(_onChange));
 
     DataSnapshot gameSnapShot = await _gameRef.once();
     List snapshotPlayers = List.from(gameSnapShot.value['players'] ?? []);
@@ -275,6 +277,9 @@ class LamaGame extends BaseGame with TapDetector {
 
   void _processGameEnd() {
     _gameResult.render();
+    _streams.forEach((stream) {
+      stream.cancel();
+    });
   }
 
   @override
