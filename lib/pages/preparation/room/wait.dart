@@ -19,6 +19,7 @@ class RoomWaitPage extends StatefulWidget {
 }
 
 class _RoomWaitPageState extends State<RoomWaitPage> {
+  static const MIN_PLAYER_COUNT = 2;
   DatabaseReference _roomRef;
   StreamSubscription _changeSubscription;
   StreamSubscription _removeSubscription;
@@ -94,9 +95,11 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
                 alignment: Alignment.center,
                 child: RaisedButton(
                   child: Text("$_memberCount 人で始める"),
-                  onPressed: () async {
-                    _startGame();
-                  },
+                  onPressed: _memberCount < MIN_PLAYER_COUNT
+                      ? null
+                      : () async {
+                          _startGame();
+                        },
                 ),
               ),
           ],
