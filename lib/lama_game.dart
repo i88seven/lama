@@ -179,6 +179,9 @@ class LamaGame extends BaseGame with TapDetector {
           if (_passButton != null && index == _myOrder && _isReadyGame) {
             _passButton.setDisabled(gamePlayer['isPassed']);
           }
+          if (index == _myOrder && _isReadyGame) {
+            _hands.setActive(_currentOrder == _myOrder);
+          }
         }
       });
       if (_isGameEnd) {
