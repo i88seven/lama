@@ -157,11 +157,15 @@ class LamaGame extends BaseGame with TapDetector {
       return;
     }
     if (e.snapshot.key == 'current') {
-      if (_currentOrder == null) {
-        _addPassButton(disabled: false);
+      if (_passButton == null) {
+        _passButton = PassButton();
+        this.add(_passButton
+          ..x = this.screenSize.width - 100
+          ..y = this.screenSize.height - 180);
       }
       _currentOrder = e.snapshot.value;
       _hands.setActive(_currentOrder == _myOrder);
+      _passButton.setDisabled(_currentOrder != _myOrder);
       return;
     }
     if (e.snapshot.key == 'players') {
@@ -172,8 +176,8 @@ class LamaGame extends BaseGame with TapDetector {
             gamePlayer['isFinished'],
             gamePlayer['isPassed'],
           );
-          if (index == _myOrder && _isReadyGame) {
-            _addPassButton(disabled: gamePlayer['isPassed']);
+          if (_passButton != null && index == _myOrder && _isReadyGame) {
+            _passButton.setDisabled(gamePlayer['isPassed']);
           }
         }
       });
@@ -210,7 +214,14 @@ class LamaGame extends BaseGame with TapDetector {
     _hands.setActive(_currentOrder == _myOrder);
     await _gameRef.child('current').set(_currentOrder);
 
-    _addPassButton(disabled: false);
+    if (_passButton == null) {
+      _passButton = PassButton();
+      _passButton.setDisabled(_currentOrder != _myOrder);
+      this.add(_passButton
+        ..x = this.screenSize.width - 100
+        ..y = this.screenSize.height - 180);
+    }
+    _passButton.setDisabled(_currentOrder != _myOrder);
   }
 
   Future<void> _processRoundEnd() async {
@@ -218,7 +229,7 @@ class LamaGame extends BaseGame with TapDetector {
       await _processRoundEndHost();
       await _deal();
     }
-    _addPassButton(disabled: false);
+    _passButton?.setDisabled(true);
   }
 
   Future<void> _processRoundEndHost() async {
@@ -331,13 +342,12 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> _pass() async {
+    _passButton.setDisabled(true);
     _gamePlayers[_myOrder].pass();
     await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
     await _turnEnd();
-
-    _addPassButton(disabled: true);
   }
 
   Future<void> _turnEnd() async {
@@ -389,15 +399,5 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': _stocks.numbers,
       'trashes': _trashes.numbers,
     });
-  }
-
-  void _addPassButton({disabled: bool}) {
-    if (_passButton != null) {
-      this.markToRemove(_passButton);
-    }
-    _passButton = PassButton(disabled);
-    this.add(_passButton
-      ..x = this.screenSize.width - 100
-      ..y = this.screenSize.height - 180);
   }
 }

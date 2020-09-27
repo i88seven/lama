@@ -7,9 +7,13 @@ import 'package:flutter/material.dart';
 
 class PassButton extends PositionComponent {
   static const Size _size = Size(80, 56);
-  final bool _disabled;
+  bool _disabled = true;
 
-  PassButton(this._disabled);
+  PassButton();
+
+  void setDisabled(bool disabled) {
+    _disabled = disabled;
+  }
 
   @override
   void render(Canvas c) {
