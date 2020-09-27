@@ -81,6 +81,10 @@ class GamePlayer {
     _textObjects.add(textComponent);
   }
 
+  bool get isGameOver {
+    return _points >= 40;
+  }
+
   toJson() {
     return {
       'uid': uid,

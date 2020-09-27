@@ -150,7 +150,7 @@ class LamaGame extends BaseGame with TapDetector {
       });
 
       _stocks.initialize(List<int>.from(e.snapshot.value['stocks'] ?? []));
-      if (_isGameEnd) {
+      if (_isRoundEnd) {
         await _processRoundEnd();
         return;
       }
@@ -185,6 +185,10 @@ class LamaGame extends BaseGame with TapDetector {
         }
       });
       if (_isGameEnd) {
+        _processGameEnd();
+        return;
+      }
+      if (_isRoundEnd) {
         await _processRoundEnd();
       }
       return;
@@ -230,7 +234,6 @@ class LamaGame extends BaseGame with TapDetector {
   Future<void> _processRoundEnd() async {
     if (_myUid == _hostUid) {
       await _processRoundEndHost();
-      await _deal();
     }
     _passButton?.setDisabled(true);
   }
@@ -257,6 +260,16 @@ class LamaGame extends BaseGame with TapDetector {
     await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+
+    if (_isGameEnd) {
+      _processGameEnd();
+      return;
+    }
+    await _deal();
+  }
+
+  void _processGameEnd() {
+    print('game end');
   }
 
   @override
@@ -275,7 +288,7 @@ class LamaGame extends BaseGame with TapDetector {
       return;
     }
 
-    if (_isTapping || _currentOrder != _myOrder || _isGameEnd) {
+    if (_isTapping || _currentOrder != _myOrder || _isRoundEnd) {
       return;
     }
     _isTapping = true;
@@ -321,7 +334,7 @@ class LamaGame extends BaseGame with TapDetector {
     int drawNumber = _stocks.drawCard();
     _hands.drawCard(drawNumber);
     await _setCardsAtDatabase();
-    if (_isGameEnd) {
+    if (_isRoundEnd) {
       await _processRoundEnd();
       return;
     }
@@ -370,12 +383,17 @@ class LamaGame extends BaseGame with TapDetector {
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
   }
 
-  bool get _isGameEnd {
+  bool get _isRoundEnd {
+    // TODO 山札がなくなってもゲームはできる
     // 誰か上がってる || 全員パスしてる || 山札がなくなった
     return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
             0 ||
         _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1 ||
         _stocks.numbers.length == 0;
+  }
+
+  bool get _isGameEnd {
+    return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isGameOver) >= 0;
   }
 
   bool get _canDraw {
