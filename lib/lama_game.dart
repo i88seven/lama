@@ -168,7 +168,7 @@ class LamaGame extends BaseGame with TapDetector {
         _passButton = PassButton();
         this.add(_passButton
           ..x = this.screenSize.width - 100
-          ..y = this.screenSize.height - 180);
+          ..y = this.screenSize.height - 222);
       }
       _currentOrder = e.snapshot.value;
       _hands.setActive(_currentOrder == _myOrder);
