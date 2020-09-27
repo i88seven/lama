@@ -15,6 +15,7 @@ import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
 import 'package:lama/components/back_card.dart';
 import 'package:lama/components/pass_button.dart';
+import 'package:lama/components/game_result.dart';
 import 'package:lama/constants/card_state.dart';
 
 class LamaGame extends BaseGame with TapDetector {
@@ -28,6 +29,7 @@ class LamaGame extends BaseGame with TapDetector {
   List<OtherHands> _othersHands;
   Stocks _stocks;
   Trashes _trashes;
+  GameResult _gameResult;
   Size screenSize;
   DatabaseReference _databaseReference;
   DatabaseReference _gameRef;
@@ -51,6 +53,7 @@ class LamaGame extends BaseGame with TapDetector {
     _othersHands = [];
     _trashes = Trashes(this);
     _stocks = Stocks(this);
+    _gameResult = GameResult(this);
   }
 
   Future<void> initializeHost() async {
@@ -269,7 +272,7 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   void _processGameEnd() {
-    print('game end');
+    _gameResult.render();
   }
 
   @override
