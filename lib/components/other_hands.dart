@@ -23,10 +23,12 @@ class OtherHands {
       _game.markToRemove(cardObject);
     });
     _cardObjects = [];
+    double padding = (_game.screenSize.width - 24) /
+        (_game.playerCount - 1) /
+        numbers.length;
     for (int i = 0; i < numbers.length; i++) {
       Position pos = Position(
-        _game.screenSize.width / (_game.playerCount - 1) * _order +
-            i * BackCard.cardSize.width / 4,
+        _game.screenSize.width / (_game.playerCount - 1) * _order + i * padding,
         80,
       );
       BackCard cardObject = BackCard(CardState.Other);
