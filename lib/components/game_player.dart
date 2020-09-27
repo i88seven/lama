@@ -85,6 +85,10 @@ class GamePlayer {
     return _points >= 40;
   }
 
+  int get points {
+    return _points;
+  }
+
   toJson() {
     return {
       'uid': uid,

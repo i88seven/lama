@@ -53,7 +53,7 @@ class LamaGame extends BaseGame with TapDetector {
     _othersHands = [];
     _trashes = Trashes(this);
     _stocks = Stocks(this);
-    _gameResult = GameResult(this);
+    _gameResult = GameResult(this, _gamePlayers);
   }
 
   Future<void> initializeHost() async {
