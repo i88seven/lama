@@ -144,8 +144,8 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   }
 
   void _onGameEnd() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => PreparationMainPage()),
+    Navigator.of(context).popUntil(
+      (route) => route.isFirst,
     );
   }
 }
