@@ -45,7 +45,7 @@ class Hands {
     this.numbers.asMap().forEach((index, number) {
       Position pos = Position(
         index * FrontCard.cardSize.width / 2,
-        _game.screenSize.height - FrontCard.cardSize.height,
+        _game.screenSize.height - FrontCard.cardSize.height - 42,
       );
       int numberDiff = number - _game.trashNumber;
       bool isActiveCard =

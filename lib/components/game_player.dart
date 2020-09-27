@@ -14,7 +14,7 @@ class GamePlayer {
   bool isPassed;
   int displayOrder; // 自分から見て次の人が "0"
   bool isMe;
-  List<TextComponent> _textObjects = [];
+  TextComponent _textObject;
 
   GamePlayer(this.game, this.uid, this.name, this.displayOrder, this.isMe) {
     _points = 0;
@@ -58,27 +58,30 @@ class GamePlayer {
   }
 
   void _render() {
-    if (this.isMe) {
-      return;
+    if (_textObject != null) {
+      this.game.markToRemove(_textObject);
     }
-
-    _textObjects.forEach((textObject) {
-      this.game.markToRemove(textObject);
-    });
-    Position pos = Position(
-      this.game.screenSize.width /
-          (this.game.playerCount - 1) *
-          this.displayOrder,
-      0,
-    );
-    TextComponent textComponent = TextComponent(
+    Position pos;
+    if (this.isMe) {
+      pos = Position(
+        0,
+        this.game.screenSize.height - 30,
+      );
+    } else {
+      pos = Position(
+        this.game.screenSize.width /
+            (this.game.playerCount - 1) *
+            this.displayOrder,
+        0,
+      );
+    }
+    _textObject = TextComponent(
       "$name: $_points",
       config: TextConfig(color: BasicPalette.white.color),
     );
-    this.game.add(textComponent
+    this.game.add(_textObject
       ..x = pos.x
       ..y = pos.y);
-    _textObjects.add(textComponent);
   }
 
   bool get isGameOver {
