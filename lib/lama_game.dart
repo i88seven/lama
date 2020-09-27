@@ -224,10 +224,11 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes.initialize(trashes);
     await _setCardsAtDatabase();
 
-    // TODO 前のゲームで最後にプレイした人から始める
-    _currentOrder = 0;
+    if (_currentOrder == null) {
+      _currentOrder = 0;
+      await _gameRef.child('current').set(_currentOrder);
+    }
     _hands.setActive(_currentOrder == _myOrder);
-    await _gameRef.child('current').set(_currentOrder);
 
     if (_passButton == null) {
       _passButton = PassButton();
@@ -240,10 +241,10 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> _processRoundEnd() async {
+    _passButton?.setDisabled(true);
     if (_myUid == _hostUid) {
       await _processRoundEndHost();
     }
-    _passButton?.setDisabled(true);
   }
 
   Future<void> _processRoundEndHost() async {
@@ -370,11 +371,12 @@ class LamaGame extends BaseGame with TapDetector {
     _hands.discard(card);
     _trashes.add(card.number);
     await _setCardsAtDatabase();
-    await _turnEnd();
 
     if (_hands.numbers.length == 0) {
       await _finish();
+      return true;
     }
+    await _turnEnd();
     return true;
   }
 
@@ -388,6 +390,9 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> _turnEnd() async {
+    if (_isRoundEnd) {
+      return;
+    }
     int nextPlayerIndex = [
       ...(_gamePlayers.sublist(_myOrder + 1)),
       ...(_gamePlayers.sublist(0, _myOrder + 1))
