@@ -15,20 +15,17 @@ class Hands {
   void initialize(List<int> numbers) {
     this.numbers = numbers;
     this.numbers.sort();
-    _isActive = false;
     _render();
   }
 
   void drawCard(number) {
     this.numbers.add(number);
     this.numbers.sort();
-    _isActive = false;
     _render();
   }
 
   void discard(FrontCard card) {
     this.numbers.remove(card.number);
-    _isActive = false;
     _render();
   }
 
