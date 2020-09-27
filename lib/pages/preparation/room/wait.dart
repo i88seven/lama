@@ -3,6 +3,7 @@ import 'package:flame/flame.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:localstorage/localstorage.dart';
 
+import 'package:lama/pages/preparation/main.dart';
 import 'package:lama/lama_game.dart';
 import 'package:lama/components/member.dart';
 
@@ -128,7 +129,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         'card-7.png',
       ]);
       Size screenSize = MediaQuery.of(context).size;
-      final game = LamaGame(widget.roomId, screenSize);
+      final game = LamaGame(widget.roomId, screenSize, _onGameEnd);
       if (_isHost) {
         await game.initializeHost();
         await _roomRef.remove();
@@ -140,5 +141,11 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
         MaterialPageRoute<void>(builder: (_) => game.widget),
       );
     } catch (e) {}
+  }
+
+  void _onGameEnd() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => PreparationMainPage()),
+    );
   }
 }

@@ -38,12 +38,13 @@ class LamaGame extends BaseGame with TapDetector {
   int _myOrder;
   int _currentOrder;
   PassButton _passButton;
+  Function onGameEnd;
 
   int get playerCount {
     return _members.length;
   }
 
-  LamaGame(this._roomId, this.screenSize) {
+  LamaGame(this._roomId, this.screenSize, this.onGameEnd) {
     LocalStorage storage = LocalStorage('lama_game');
     _myUid = storage.getItem('myUid');
     _databaseReference = FirebaseDatabase.instance.reference();
@@ -296,7 +297,7 @@ class LamaGame extends BaseGame with TapDetector {
       for (final c in components) {
         if (c is GameEndButton && c.toRect().contains(details.localPosition)) {
           _gameResult.remove();
-          _gameEnd();
+          this.onGameEnd();
         }
       }
     }
@@ -433,9 +434,5 @@ class LamaGame extends BaseGame with TapDetector {
       'stocks': _stocks.numbers,
       'trashes': _trashes.numbers,
     });
-  }
-
-  void _gameEnd() {
-    // TODO
   }
 }
