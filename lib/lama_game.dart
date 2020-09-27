@@ -383,16 +383,16 @@ class LamaGame extends BaseGame with TapDetector {
   Future<void> _pass() async {
     _passButton.setDisabled(true);
     _gamePlayers[_myOrder].pass();
+    bool shouldTurnEnd = !_isRoundEnd;
     await _gameRef
         .child('players')
         .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
-    await _turnEnd();
+    if (shouldTurnEnd) {
+      await _turnEnd();
+    }
   }
 
   Future<void> _turnEnd() async {
-    if (_isRoundEnd) {
-      return;
-    }
     int nextPlayerIndex = [
       ...(_gamePlayers.sublist(_myOrder + 1)),
       ...(_gamePlayers.sublist(0, _myOrder + 1))
