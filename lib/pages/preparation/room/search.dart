@@ -60,6 +60,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                       TextFormField(
                         controller: _roomIdController,
                         decoration: const InputDecoration(labelText: '部屋ID'),
+                        maxLength: 10,
                         validator: (String value) {
                           if (value.isEmpty) return '入力してください';
                           return null;
