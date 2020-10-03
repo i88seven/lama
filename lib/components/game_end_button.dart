@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flame/anchor.dart';
 import 'package:flame/components/component.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +36,5 @@ class GameEndButton extends PositionComponent {
   void onMount() {
     width = _size.width;
     height = _size.height;
-    anchor = Anchor.topLeft;
   }
 }

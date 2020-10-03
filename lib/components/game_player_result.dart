@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flame/anchor.dart';
 import 'package:flame/components/component.dart';
 import 'package:flutter/material.dart';
 
@@ -33,10 +32,5 @@ class GamePlayerResult extends PositionComponent {
     );
     final offset = Offset(24, 4);
     textPainter.paint(c, offset);
-  }
-
-  @override
-  void onMount() {
-    anchor = Anchor.topLeft;
   }
 }

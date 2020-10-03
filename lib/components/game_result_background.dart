@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flame/anchor.dart';
 import 'package:flame/components/component.dart';
 
 class GameResultBackground extends PositionComponent {
@@ -18,10 +17,5 @@ class GameResultBackground extends PositionComponent {
   @override
   void update(double t) {
     super.update(t);
-  }
-
-  @override
-  void onMount() {
-    anchor = Anchor.topLeft;
   }
 }

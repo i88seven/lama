@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flame/anchor.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame/components/component.dart';
 import 'package:flutter/material.dart';
@@ -66,10 +65,5 @@ class FrontCard extends PositionComponent {
     time += t * 2;
     this.lightIntensity = ((sin(time) + 1) * MAX_LIGHT_INTENSITY / 2).floor();
     super.update(t);
-  }
-
-  @override
-  void onMount() {
-    anchor = Anchor.topLeft;
   }
 }
