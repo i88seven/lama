@@ -39,14 +39,6 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
           padding: EdgeInsets.all(8),
           scrollDirection: Axis.vertical,
           children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                _myUid,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              alignment: Alignment.center,
-            ),
             Form(
               key: _formKey,
               child: Card(
