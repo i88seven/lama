@@ -70,8 +70,6 @@ class FrontCard extends PositionComponent {
 
   @override
   void onMount() {
-    width = cardSize.width;
-    height = cardSize.height;
     anchor = Anchor.topLeft;
   }
 }

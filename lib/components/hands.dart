@@ -49,6 +49,10 @@ class Hands {
           _isActive && (numberDiff == 0 || numberDiff == 1 || numberDiff == -6);
       FrontCard cardObject = FrontCard(number, CardState.Hand, isActiveCard);
       _game.add(cardObject
+        ..width = index < this.numbers.length - 1
+            ? FrontCard.cardSize.width / 2
+            : FrontCard.cardSize.width
+        ..height = FrontCard.cardSize.height
         ..x = pos.x
         ..y = pos.y);
       _cardObjects.add(cardObject);
