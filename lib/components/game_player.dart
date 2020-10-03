@@ -49,13 +49,9 @@ class GamePlayer {
     _render();
   }
 
-  void pass() {
-    this.isPassed = true;
-  }
+  void pass() => this.isPassed = true;
 
-  void finish() {
-    this.isFinished = true;
-  }
+  void finish() => this.isFinished = true;
 
   void _render() {
     if (_textObject != null) {
@@ -84,13 +80,9 @@ class GamePlayer {
       ..y = pos.y);
   }
 
-  bool get isGameOver {
-    return _points >= 40;
-  }
+  bool get isGameOver => _points >= 40;
 
-  int get points {
-    return _points;
-  }
+  int get points => _points;
 
   toJson() {
     return {
