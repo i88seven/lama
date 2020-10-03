@@ -97,22 +97,26 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
       // TODO すでに存在していて、自分以外が作っていたらエラー
-      _databaseReference
+      DatabaseReference roomRef = _databaseReference
           .child('preparationRooms')
-          .child(_roomIdController.text)
-          .set({
+          .child(_roomIdController.text);
+      roomRef.set({
         'hostUid': _myUid,
         'hostName': myName,
         'members': {_myUid: myName}
       });
       _storage.setItem('myRoomId', _roomIdController.text);
 
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-            builder: (_) => RoomWaitPage(
-                  roomId: _roomIdController.text,
-                )),
+      bool shouldDelete = await Navigator.of(context).push(
+        MaterialPageRoute<bool>(
+          builder: (context) => RoomWaitPage(
+            roomId: _roomIdController.text,
+          ),
+        ),
       );
+      if (shouldDelete) {
+        roomRef.remove();
+      }
     } catch (e) {}
   }
 }

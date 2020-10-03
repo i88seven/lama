@@ -70,41 +70,47 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Builder(builder: (BuildContext context) {
-        return ListView(
-          padding: EdgeInsets.all(8),
-          scrollDirection: Axis.vertical,
-          children: <Widget>[
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (BuildContext context, index) {
-                return ListTile(
-                  title: Text(_memberList[index].name),
-                );
-              },
-              itemCount: _memberCount,
-            ),
-            if (_isHost)
-              Container(
-                padding: const EdgeInsets.only(top: 16.0),
-                alignment: Alignment.center,
-                child: RaisedButton(
-                  child: Text("$_memberCount 人で始める"),
-                  onPressed: _memberCount < MIN_PLAYER_COUNT
-                      ? null
-                      : () async {
-                          _startGame();
-                        },
-                ),
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.of(context).pop(true);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Builder(builder: (BuildContext context) {
+          return ListView(
+            padding: EdgeInsets.all(8),
+            scrollDirection: Axis.vertical,
+            children: <Widget>[
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (BuildContext context, index) {
+                  return ListTile(
+                    title: Text(_memberList[index].name),
+                  );
+                },
+                itemCount: _memberCount,
               ),
-          ],
-        );
-      }),
+              if (_isHost)
+                Container(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  alignment: Alignment.center,
+                  child: RaisedButton(
+                    child: Text("$_memberCount 人で始める"),
+                    onPressed: _memberCount < MIN_PLAYER_COUNT
+                        ? null
+                        : () async {
+                            _startGame();
+                          },
+                  ),
+                ),
+            ],
+          );
+        }),
+      ),
     );
   }
 
