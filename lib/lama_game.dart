@@ -119,21 +119,20 @@ class LamaGame extends BaseGame with TapDetector {
     List snapshotPlayers = List.from(data['players'] ?? []);
     snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
       String uid = snapshotPlayer['uid'];
+      String name = snapshotPlayer['name'];
       if (uid == _myUid) {
         _myOrder = index;
       }
-    });
-    snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
-      String uid = snapshotPlayer['uid'];
-      String name = snapshotPlayer['name'];
       Member member = Member(uid: uid, name: name);
       _members.add(member);
+    });
+    _members.asMap().forEach((index, member) {
       GamePlayer gamePlayer = GamePlayer(
         this,
-        uid,
-        name,
+        member.uid,
+        member.name,
         (index - _myOrder - 1) % this.playerCount,
-        uid == _myUid,
+        member.uid == _myUid,
       );
       _gamePlayers.add(gamePlayer);
     });
