@@ -4,7 +4,7 @@ import 'package:flame/components/component.dart';
 import 'package:flutter/material.dart';
 
 class GameStartButton extends PositionComponent {
-  static const Size size = Size(108, 46);
+  static const Size size = Size(112, 50);
 
   @override
   void render(Canvas c) {
