@@ -22,7 +22,6 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   static const MIN_PLAYER_COUNT = 2;
   DocumentReference _roomRef;
   StreamSubscription _changeSubscription;
-  StreamSubscription _removeSubscription;
   List<Member> _memberList = [];
   Member _hostMember;
   LocalStorage _storage = LocalStorage('lama_game');
@@ -108,7 +107,6 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   @override
   void dispose() {
     _changeSubscription.cancel();
-    _removeSubscription.cancel();
     super.dispose();
   }
 
