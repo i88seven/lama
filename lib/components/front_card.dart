@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:flame/palette.dart';
 
 import 'package:flame/sprite.dart';
 import 'package:flame/components/component.dart';
@@ -31,7 +32,7 @@ class FrontCard extends PositionComponent {
 
   renderCard(Canvas c, int number) {
     Rect rect = Rect.fromLTWH(0, 0, cardSize.width, cardSize.height);
-    _cardImage.renderRect(c, rect);
+    c.drawRect(rect, BasicPalette.white.paint);
     if (this.active) {
       int alpha = MAX_LIGHT_INTENSITY - lightIntensity;
       Color color = Color.fromARGB(alpha, 255, 255, 128);
