@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'dart:async';
 
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +34,8 @@ class LamaGame extends BaseGame with TapDetector {
   Trashes _trashes;
   GameResult _gameResult;
   Size screenSize;
-  DatabaseReference _databaseReference;
-  DatabaseReference _gameRef;
+  FirebaseFirestore _databaseReference = FirebaseFirestore.instance;
+  DocumentReference _gameRef;
   List<StreamSubscription> _streams = [];
   String _hostUid;
   int _myOrder;
@@ -51,7 +51,6 @@ class LamaGame extends BaseGame with TapDetector {
   LamaGame(this._roomId, this.screenSize, this.onGameEnd) {
     LocalStorage storage = LocalStorage('lama_game');
     _myUid = storage.getItem('myUid');
-    _databaseReference = FirebaseDatabase.instance.reference();
     _hostUid = '';
     _members = [];
     _gamePlayers = [];
@@ -63,18 +62,21 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   Future<void> initializeHost() async {
-    DatabaseReference roomRef =
-        _databaseReference.child('preparationRooms').child(_roomId);
-    DataSnapshot roomSnapshot = await roomRef.once();
-    _hostUid = roomSnapshot.value['hostUid'];
-    _gameRef = _databaseReference.child(_hostUid);
-    await _gameRef.remove();
-    _gameRef.keepSynced(true);
-    _streams.add(_gameRef.onChildChanged.listen(_onChange));
+    DocumentReference roomRef =
+        _databaseReference.collection('preparationRooms').doc(_roomId);
+    DocumentSnapshot roomSnapshot = await roomRef.get();
+    Map<String, dynamic> roomData = roomSnapshot.data();
+    _hostUid = roomData['hostUid'];
+    _gameRef = _databaseReference.collection('games').doc(_hostUid);
+    await _gameRef.delete();
+    _streams.add(_gameRef.snapshots().listen(_onChange));
 
-    Map snapshotMembers = Map.from(roomSnapshot.value['members'] ?? {});
-    snapshotMembers.forEach((uid, name) {
-      Member member = Member(uid: uid, name: name);
+    List<Map> snapshotMembers = List<Map>.from(roomData['members']);
+    snapshotMembers.forEach((Map snapshotMember) {
+      Member member = Member(
+        uid: snapshotMember['uid'],
+        name: snapshotMember['name'],
+      );
       _members.add(member);
     });
     _members.shuffle();
@@ -93,9 +95,9 @@ class LamaGame extends BaseGame with TapDetector {
       );
       _gamePlayers.add(gamePlayer);
     });
-    await _gameRef
-        .child('players')
-        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+    await _gameRef.set({
+      'players': _gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList()
+    });
 
     for (int i = 0; i < this.playerCount - 1; i++) {
       OtherHands otherHands = OtherHands(this, i);
@@ -109,13 +111,12 @@ class LamaGame extends BaseGame with TapDetector {
 
   Future<void> initializeSlave({hostUid: String}) async {
     _hostUid = hostUid;
-    _gameRef = _databaseReference.child(_hostUid);
-    _gameRef.keepSynced(true);
-    _streams.add(_gameRef.onChildChanged.listen(_onChange));
-    _streams.add(_gameRef.onChildAdded.listen(_onChange));
+    _gameRef = _databaseReference.collection('games').doc(_hostUid);
+    _streams.add(_gameRef.snapshots().listen(_onChange));
 
-    DataSnapshot gameSnapShot = await _gameRef.once();
-    List snapshotPlayers = List.from(gameSnapShot.value['players'] ?? []);
+    DocumentSnapshot gameSnapShot = await _gameRef.get();
+    Map<String, dynamic> data = gameSnapShot.data();
+    List snapshotPlayers = List.from(data['players'] ?? []);
     snapshotPlayers.asMap().forEach((index, snapshotPlayer) {
       String uid = snapshotPlayer['uid'];
       if (uid == _myUid) {
@@ -145,13 +146,29 @@ class LamaGame extends BaseGame with TapDetector {
     _isReadyGame = true;
   }
 
-  Future<void> _onChange(Event e) async {
-    if (e.snapshot.key == 'cards') {
-      List<List<dynamic>> playersCards =
-          List<List<dynamic>>.from(e.snapshot.value['players']);
-
+  Future<void> _onChange(DocumentSnapshot snapshot) async {
+    Map<String, dynamic> data = snapshot.data();
+    if (data == null || data.isEmpty) {
+      return;
+    }
+    if (data['trashCards'] != null) {
       // hands の initialize の前に trash を initialize する
-      _trashes.initialize(List<int>.from(e.snapshot.value['trashes'] ?? []));
+      _trashes.initialize(List<int>.from(data['trashCards'] ?? []));
+    }
+    for (int i = 0; i < this.playerCount; i++) {
+      if (data["playerCards-$i"] == null) {
+        continue;
+      }
+      if (i == _myOrder) {
+        _hands.initialize(List<int>.from(data["playerCards-$i"] ?? []));
+        continue;
+      }
+      _othersHands[(i - _myOrder - 1) % this.playerCount]
+          .initialize(List<int>.from(data["playerCards-$i"] ?? []));
+    }
+    if (data['playerCards'] != null) {
+      List<List<dynamic>> playersCards =
+          List<List<dynamic>>.from(data['playerCards']);
 
       playersCards.asMap().forEach((i, playerCards) {
         if (i == _myOrder) {
@@ -161,28 +178,23 @@ class LamaGame extends BaseGame with TapDetector {
         _othersHands[(i - _myOrder - 1) % this.playerCount]
             .initialize(List<int>.from(playerCards ?? []));
       });
-
-      _stocks.initialize(List<int>.from(e.snapshot.value['stocks'] ?? []));
-      if (_isRoundEnd) {
-        await _processRoundEnd();
-        return;
-      }
-      return;
     }
-    if (e.snapshot.key == 'current') {
+    if (data['stockCards'] != null) {
+      _stocks.initialize(List<int>.from(data['stockCards'] ?? []));
+    }
+    if (data['current'] != null) {
       if (_passButton == null) {
         _passButton = PassButton();
         this.add(_passButton
           ..x = this.screenSize.width - 100
           ..y = this.screenSize.height - 222);
       }
-      _currentOrder = e.snapshot.value;
+      _currentOrder = data['current'];
       _hands.setActive(_currentOrder == _myOrder);
       _passButton.setDisabled(_currentOrder != _myOrder);
-      return;
     }
-    if (e.snapshot.key == 'players') {
-      e.snapshot.value.asMap().forEach((index, gamePlayer) {
+    if (data['players'] != null) {
+      data['players'].asMap().forEach((index, gamePlayer) {
         if (_gamePlayers.length > 0) {
           _gamePlayers[index].set(
             gamePlayer['points'],
@@ -202,7 +214,6 @@ class LamaGame extends BaseGame with TapDetector {
       if (_isRoundEnd) {
         await _processRoundEnd();
       }
-      return;
     }
   }
 
@@ -230,7 +241,7 @@ class LamaGame extends BaseGame with TapDetector {
 
     if (_currentOrder == null) {
       _currentOrder = 0;
-      await _gameRef.child('current').set(_currentOrder);
+      await _gameRef.update({'current': _currentOrder});
     }
     _hands.setActive(_currentOrder == _myOrder);
 
@@ -270,9 +281,9 @@ class LamaGame extends BaseGame with TapDetector {
     });
     // _isGameEnd の状態を一旦 False にしないと何度も得点が加算される
     _stocks.initialize([0]);
-    await _gameRef
-        .child('players')
-        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+    await _gameRef.update({
+      'players': _gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList()
+    });
 
     if (_isGameEnd) {
       _processGameEnd();
@@ -394,9 +405,9 @@ class LamaGame extends BaseGame with TapDetector {
     _passButton.setDisabled(true);
     _gamePlayers[_myOrder].pass();
     bool shouldTurnEnd = !_isRoundEnd;
-    await _gameRef
-        .child('players')
-        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+    await _gameRef.update({
+      'players': _gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList()
+    });
     if (shouldTurnEnd) {
       await _turnEnd();
     }
@@ -407,16 +418,15 @@ class LamaGame extends BaseGame with TapDetector {
       ...(_gamePlayers.sublist(_myOrder + 1)),
       ...(_gamePlayers.sublist(0, _myOrder + 1))
     ].indexWhere((gamePlayer) => !gamePlayer.isPassed);
-    await _gameRef
-        .child('current')
-        .set((nextPlayerIndex + _myOrder + 1) % this.playerCount);
+    await _gameRef.update(
+        {'current': (nextPlayerIndex + _myOrder + 1) % this.playerCount});
   }
 
   Future<void> _finish() async {
     _gamePlayers[_myOrder].finish();
-    await _gameRef
-        .child('players')
-        .set(_gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList());
+    await _gameRef.update({
+      'players': _gamePlayers.map((gamePlayer) => gamePlayer.toJson()).toList()
+    });
   }
 
   bool get _isRoundEnd {
@@ -446,19 +456,21 @@ class LamaGame extends BaseGame with TapDetector {
       _hands.numbers,
       ...(_othersHands.map((otherHands) => otherHands.numbers))
     ];
-    await _gameRef.child('cards').set({
-      'players': [
-        ...(playersCards.sublist(this.playerCount - _myOrder)),
-        ...(playersCards.sublist(0, (this.playerCount - _myOrder)))
-      ],
-      'stocks': _stocks.numbers,
-      'trashes': _trashes.numbers,
+    Map<String, List<int>> newJson = {
+      'stockCards': _stocks.numbers,
+      'trashCards': _trashes.numbers,
+      "playerCards-$_myOrder": _hands.numbers,
+    };
+    _othersHands.asMap().forEach((index, otherHands) {
+      newJson["playerCards-${(_myOrder + index + 1) % this.playerCount}"] =
+          otherHands.numbers;
     });
+    await _gameRef.update(newJson);
   }
 
   Future<void> _gameEnd() async {
     if (_myUid == _hostUid) {
-      await _gameRef.remove();
+      await _gameRef.delete();
     }
     this.onGameEnd();
   }

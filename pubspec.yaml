@@ -31,7 +31,7 @@ dependencies:
   flutter_signin_button: ^1.1.0
   flame: ^0.25.0
   firebase_core: ^0.5.0
-  firebase_database: ^4.0.0
+  cloud_firestore: ^0.14.1+2
   firebase_auth: ^0.18.0+1
   localstorage: ^3.0.0
 

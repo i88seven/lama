@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:lama/pages/preparation/room/wait.dart';
 
@@ -13,7 +13,6 @@ class RoomCreatePage extends StatefulWidget {
 class _RoomCreatePageState extends State<RoomCreatePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
-  DatabaseReference _databaseReference = FirebaseDatabase.instance.reference();
   LocalStorage _storage = LocalStorage('lama_game');
   String _myUid = '';
 
@@ -90,13 +89,15 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
       // TODO すでに存在していて、自分以外が作っていたらエラー
-      DatabaseReference roomRef = _databaseReference
-          .child('preparationRooms')
-          .child(_roomIdController.text);
-      roomRef.set({
+      DocumentReference roomRef = FirebaseFirestore.instance
+          .collection('preparationRooms')
+          .doc(_roomIdController.text);
+      await roomRef.set({
         'hostUid': _myUid,
         'hostName': myName,
-        'members': {_myUid: myName}
+        'members': FieldValue.arrayUnion([
+          {'uid': _myUid, 'name': myName}
+        ])
       });
       _storage.setItem('myRoomId', _roomIdController.text);
 
@@ -108,7 +109,7 @@ class _RoomCreatePageState extends State<RoomCreatePage> {
         ),
       );
       if (shouldDelete) {
-        roomRef.remove();
+        roomRef.delete();
       }
     } catch (e) {}
   }

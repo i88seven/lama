@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flame/flame.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/lama_game.dart';
@@ -20,7 +20,7 @@ class RoomWaitPage extends StatefulWidget {
 
 class _RoomWaitPageState extends State<RoomWaitPage> {
   static const MIN_PLAYER_COUNT = 2;
-  DatabaseReference _roomRef;
+  DocumentReference _roomRef;
   StreamSubscription _changeSubscription;
   StreamSubscription _removeSubscription;
   List<Member> _memberList = [];
@@ -40,25 +40,16 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   void initState() {
     widget.title = "${widget.roomId} 待機中...";
     _memberList = [];
-    _roomRef = FirebaseDatabase.instance
-        .reference()
-        .child('preparationRooms')
-        .child(widget.roomId);
-    _changeSubscription = _roomRef.onChildChanged.listen(_onChangeMember);
-    _removeSubscription = _roomRef.onChildRemoved.listen(_onRemoveRoom);
-    Map snapshotMembers;
-    _roomRef.once().then((DataSnapshot snapshot) {
+    _roomRef = FirebaseFirestore.instance
+        .collection('preparationRooms')
+        .doc(widget.roomId);
+    _changeSubscription = _roomRef.snapshots().listen(_onChange);
+    _roomRef.get().then((DocumentSnapshot snapshot) {
+      Map<String, dynamic> data = snapshot.data();
       _hostMember = Member(
-        uid: snapshot.value['hostUid'],
-        name: snapshot.value['hostName'],
+        uid: data['hostUid'],
+        name: data['hostName'],
       );
-      snapshotMembers = Map.from(snapshot.value['members'] ?? {});
-      snapshotMembers.forEach((uid, name) {
-        Member member = Member(uid: uid, name: name);
-        setState(() {
-          _memberList.add(member);
-        });
-      });
     });
     super.initState();
 
@@ -121,25 +112,26 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
     super.dispose();
   }
 
-  void _onChangeMember(Event e) {
-    if (e.snapshot.key != 'members') {
-      return;
+  void _onChange(DocumentSnapshot snapshot) {
+    if (!snapshot.exists) {
+      _startGame();
     }
 
-    Map snapshotMembers = Map.from(e.snapshot.value ?? {});
+    Map<String, dynamic> data = snapshot.data();
+    if (data == null || data.isEmpty) {
+      return;
+    }
+    List<Map> snapshotMembers = List<Map>.from(data['members']);
     _memberList = [];
-    snapshotMembers.forEach((uid, name) {
-      Member member = Member(uid: uid, name: name);
+    snapshotMembers.forEach((Map snapshotMember) {
+      Member member = Member(
+        uid: snapshotMember['uid'],
+        name: snapshotMember['name'],
+      );
       setState(() {
         _memberList.add(member);
       });
     });
-  }
-
-  void _onRemoveRoom(Event e) {
-    if (e.snapshot.key == 'members') {
-      _startGame();
-    }
   }
 
   void _startGame() async {
@@ -151,7 +143,7 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
       final game = LamaGame(widget.roomId, screenSize, _onGameEnd);
       if (_isHost) {
         await game.initializeHost();
-        await _roomRef.remove();
+        await _roomRef.delete();
       } else {
         await game.initializeSlave(hostUid: _hostMember.uid);
       }

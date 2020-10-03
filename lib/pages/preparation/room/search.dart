@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/components/member.dart';
@@ -13,7 +13,7 @@ class RoomSearchPage extends StatefulWidget {
 }
 
 class _RoomSearchPageState extends State<RoomSearchPage> {
-  DatabaseReference _roomRef;
+  CollectionReference _roomRef;
   final LocalStorage _storage = new LocalStorage('lama_game');
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _roomIdController = TextEditingController();
@@ -28,7 +28,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
 
   @override
   void initState() {
-    _roomRef = FirebaseDatabase.instance.reference().child('preparationRooms');
+    _roomRef = FirebaseFirestore.instance.collection('preparationRooms');
     super.initState();
 
     Future(() async {
@@ -134,9 +134,9 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
 
   void _searchRoom() async {
     try {
-      DataSnapshot snapshot =
-          await _roomRef.child(_roomIdController.text).once();
-      if (snapshot.value == null || snapshot.value['hostUid'] == null) {
+      DocumentSnapshot snapshot =
+          await _roomRef.doc(_roomIdController.text).get();
+      if (!snapshot.exists) {
         setState(() {
           _roomId = null;
           _host = null;
@@ -144,11 +144,12 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
         });
         return;
       }
+      Map<String, dynamic> data = snapshot.data();
       setState(() {
-        _roomId = snapshot.key;
+        _roomId = snapshot.id;
         _host = Member(
-          uid: snapshot.value['hostUid'],
-          name: snapshot.value['hostName'],
+          uid: data['hostUid'],
+          name: data['hostName'],
         );
         _isNoResult = false;
       });
@@ -159,7 +160,11 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
     try {
       String myName = _storage.getItem('myName') ?? '';
       // TODO myName 取得できなかったらエラー
-      _roomRef.child(roomId).child('members').child(_myUid).set(myName);
+      _roomRef.doc(roomId).update({
+        'members': FieldValue.arrayUnion([
+          {'uid': _myUid, 'name': myName}
+        ])
+      });
       _storage.setItem('searchRoomId', _roomIdController.text);
 
       Navigator.of(context).push(
