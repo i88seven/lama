@@ -48,6 +48,7 @@ class _PreparationMainPageState extends State<PreparationMainPage> {
                       TextFormField(
                         controller: _myNameController,
                         decoration: const InputDecoration(labelText: '表示名'),
+                        maxLength: 10,
                         validator: (String value) {
                           if (value.isEmpty) return '入力してください';
                           return null;
