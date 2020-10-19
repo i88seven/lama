@@ -5,7 +5,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/gestures.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:lama/components/game_end_button.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'package:lama/components/member.dart';
@@ -17,6 +16,8 @@ import 'package:lama/components/trashes.dart';
 import 'package:lama/components/front_card.dart';
 import 'package:lama/components/back_card.dart';
 import 'package:lama/components/pass_button.dart';
+import 'package:lama/components/game_start_button.dart';
+import 'package:lama/components/game_end_button.dart';
 import 'package:lama/components/game_result.dart';
 import 'package:lama/constants/card_state.dart';
 
@@ -39,6 +40,7 @@ class LamaGame extends BaseGame with TapDetector {
   String _hostUid;
   int _myOrder;
   int _currentOrder;
+  GameStartButton _gameStartButton;
   PassButton _passButton;
   Function onGameEnd;
 
@@ -99,6 +101,10 @@ class LamaGame extends BaseGame with TapDetector {
       OtherHands otherHands = OtherHands(this, i);
       _othersHands.add(otherHands);
     }
+    _gameStartButton = GameStartButton()
+      ..x = (this.screenSize.width - GameStartButton.size.width) / 2
+      ..y = (this.screenSize.height - GameStartButton.size.height) / 2;
+    this.add(_gameStartButton);
   }
 
   Future<void> initializeSlave({hostUid: String}) async {
@@ -291,9 +297,15 @@ class LamaGame extends BaseGame with TapDetector {
   @override
   Future<void> onTapUp(details) async {
     if (!_isReadyGame) {
-      _isReadyGame = true;
-      if (_myUid == _hostUid) {
-        await _deal();
+      for (final c in components) {
+        if (c is GameStartButton &&
+            c.toRect().contains(details.localPosition)) {
+          _isReadyGame = true;
+          this.markToRemove(_gameStartButton);
+          if (_myUid == _hostUid) {
+            await _deal();
+          }
+        }
       }
       return;
     }
