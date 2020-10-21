@@ -145,7 +145,14 @@ class _RoomWaitPageState extends State<RoomWaitPage> {
   void _startGame() async {
     try {
       Flame.images.loadAll(<String>[
+        'card-1.png',
+        'card-2.png',
+        'card-3.png',
+        'card-4.png',
+        'card-5.png',
+        'card-6.png',
         'card-7.png',
+        'card-back.png',
       ]);
       Size screenSize = MediaQuery.of(context).size;
       final game = LamaGame(widget.roomId, screenSize, _onGameEnd);

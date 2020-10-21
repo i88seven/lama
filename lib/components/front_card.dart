@@ -19,7 +19,7 @@ class FrontCard extends PositionComponent {
   static const int MAX_LIGHT_INTENSITY = 160;
 
   FrontCard(this.number, this.state, this.active) {
-    _cardImage = Sprite('card-7.png');
+    _cardImage = Sprite("card-${this.number}.png");
   }
 
   @override
@@ -37,24 +37,6 @@ class FrontCard extends PositionComponent {
       Color color = Color.fromARGB(alpha, 255, 255, 128);
       c.drawRect(rect, Paint()..color = color);
     }
-    final textStyle = TextStyle(
-      color: Colors.green,
-      fontSize: 30,
-    );
-    final textSpan = TextSpan(
-      text: number.toString(),
-      style: textStyle,
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: 100,
-    );
-    final offset = Offset(0, 0);
-    textPainter.paint(c, offset);
   }
 
   @override

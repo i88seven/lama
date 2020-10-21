@@ -1,7 +1,7 @@
 import 'dart:ui';
 
+import 'package:flame/sprite.dart';
 import 'package:flame/components/component.dart';
-import 'package:flame/palette.dart';
 
 import 'package:lama/constants/card_state.dart';
 
@@ -9,8 +9,11 @@ import 'package:lama/constants/card_state.dart';
 class BackCard extends PositionComponent {
   static const Size cardSize = Size(60, 85);
   final CardState state;
+  Sprite _cardImage;
 
-  BackCard(this.state);
+  BackCard(this.state) {
+    _cardImage = Sprite("card-back.png");
+  }
 
   @override
   void render(Canvas c) {
@@ -20,8 +23,8 @@ class BackCard extends PositionComponent {
   }
 
   renderCard(Canvas c) {
-    c.drawRect(Rect.fromLTWH(0, 0, cardSize.width, cardSize.height),
-        BasicPalette.white.paint);
+    Rect rect = Rect.fromLTWH(0, 0, cardSize.width, cardSize.height);
+    _cardImage.renderRect(c, rect);
   }
 
   @override
