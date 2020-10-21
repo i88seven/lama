@@ -68,7 +68,7 @@ class GamePlayer {
         this.game.screenSize.width /
             (this.game.playerCount - 1) *
             this.displayOrder,
-        0,
+        30,
       );
     }
     _textObject = TextComponent(
