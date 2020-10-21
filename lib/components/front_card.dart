@@ -9,7 +9,7 @@ import 'package:lama/constants/card_state.dart';
 
 // 表向きのカード描画
 class FrontCard extends PositionComponent {
-  static const Size cardSize = Size(60, 85);
+  static const Size cardSize = Size(90, 127);
   final int number;
   final CardState state;
   final active;

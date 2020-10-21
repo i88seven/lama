@@ -18,8 +18,8 @@ class Stocks {
       return;
     }
     _cardObject = BackCard(CardState.Stock)
-      ..x = 200 / 2
-      ..y = 500 / 2;
+      ..x = 90
+      ..y = 250;
     _game.add(_cardObject);
   }
 

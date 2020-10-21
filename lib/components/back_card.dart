@@ -7,7 +7,7 @@ import 'package:lama/constants/card_state.dart';
 
 // 裏向きのカード描画
 class BackCard extends PositionComponent {
-  static const Size cardSize = Size(60, 85);
+  static const Size cardSize = Size(90, 127);
   final CardState state;
   Sprite _cardImage;
 

@@ -173,7 +173,7 @@ class LamaGame extends BaseGame with TapDetector {
         _passButton = PassButton();
         this.add(_passButton
           ..x = this.screenSize.width - 100
-          ..y = this.screenSize.height - 222);
+          ..y = this.screenSize.height - 260);
       }
       _currentOrder = e.snapshot.value;
       _hands.setActive(_currentOrder == _myOrder);
@@ -238,7 +238,7 @@ class LamaGame extends BaseGame with TapDetector {
       _passButton.setDisabled(_currentOrder != _myOrder);
       this.add(_passButton
         ..x = this.screenSize.width - 100
-        ..y = this.screenSize.height - 222);
+        ..y = this.screenSize.height - 260);
     }
     _passButton.setDisabled(_currentOrder != _myOrder);
   }
