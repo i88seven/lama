@@ -39,9 +39,14 @@ class Hands {
       _game.markToRemove(cardObject);
     });
     _cardObjects = [];
+    double cardPadding = FrontCard.cardSize.width / 2;
+    if (_game.screenSize.width <
+        (FrontCard.cardSize.width) / 2 * numbers.length) {
+      cardPadding = _game.screenSize.width / numbers.length;
+    }
     this.numbers.asMap().forEach((index, number) {
       Position pos = Position(
-        index * FrontCard.cardSize.width / 2,
+        index * cardPadding,
         _game.screenSize.height - FrontCard.cardSize.height - 42,
       );
       int numberDiff = number - _game.trashNumber;
