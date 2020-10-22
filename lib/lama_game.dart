@@ -7,6 +7,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
+import 'package:lama/components/game_background.dart';
 import 'package:lama/components/member.dart';
 import 'package:lama/components/game_player.dart';
 import 'package:lama/components/hands.dart';
@@ -60,6 +61,7 @@ class LamaGame extends BaseGame with TapDetector {
     _trashes = Trashes(this);
     _stocks = Stocks(this);
     _gameResult = GameResult(this, _gamePlayers);
+    this.add(GameBackground(this));
   }
 
   Future<void> initializeHost() async {
