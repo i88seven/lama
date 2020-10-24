@@ -102,7 +102,7 @@ class _RoomSearchPageState extends State<RoomSearchPage> {
                     style: TextStyle(fontSize: 18.0),
                   ),
                   Text(
-                    "ホスト名: ${_host.name}",
+                    "リーダー: ${_host.name}",
                     style: TextStyle(fontSize: 18.0),
                   ),
                 ],
