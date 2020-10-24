@@ -5,7 +5,7 @@ import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 
 class PassButton extends PositionComponent {
-  static const Size _size = Size(80, 56);
+  static const Size _size = Size(110, 56);
   bool _disabled = true;
 
   PassButton();
@@ -26,7 +26,7 @@ class PassButton extends PositionComponent {
       fontSize: 30,
     );
     final textSpan = TextSpan(
-      text: 'パス',
+      text: '降りる',
       style: textStyle,
     );
     final textPainter = TextPainter(

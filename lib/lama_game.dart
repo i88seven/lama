@@ -174,7 +174,7 @@ class LamaGame extends BaseGame with TapDetector {
       if (_passButton == null) {
         _passButton = PassButton();
         this.add(_passButton
-          ..x = this.screenSize.width - 100
+          ..x = this.screenSize.width - 130
           ..y = this.screenSize.height - 260);
       }
       _currentOrder = e.snapshot.value;
@@ -239,7 +239,7 @@ class LamaGame extends BaseGame with TapDetector {
       _passButton = PassButton();
       _passButton.setDisabled(_currentOrder != _myOrder);
       this.add(_passButton
-        ..x = this.screenSize.width - 100
+        ..x = this.screenSize.width - 130
         ..y = this.screenSize.height - 260);
     }
     _passButton.setDisabled(_currentOrder != _myOrder);
@@ -421,7 +421,7 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   bool get _isRoundEnd {
-    // 誰か上がってる || 全員パスしてる
+    // 誰か上がってる || 全員降りている
     return _gamePlayers.indexWhere((gamePlayer) => gamePlayer.isFinished) >=
             0 ||
         _gamePlayers.indexWhere((gamePlayer) => !gamePlayer.isPassed) == -1;
@@ -432,7 +432,7 @@ class LamaGame extends BaseGame with TapDetector {
   }
 
   bool get _canDraw {
-    // 自分はパスしてない && 山札がある && 自分以外にパスしてない人がいる
+    // 自分は降りてない && 山札がある && 自分以外に降りてない人がいる
     return !_gamePlayers[_myOrder].isPassed &&
         _stocks.numbers.length > 0 &&
         _gamePlayers.where((gamePlayer) => !gamePlayer.isPassed).length > 1;
