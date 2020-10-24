@@ -73,7 +73,8 @@ class GamePlayer {
     }
     _textObject = TextComponent(
       "$name: $_points",
-      config: TextConfig(color: BasicPalette.white.color),
+      config: TextConfig(
+          color: BasicPalette.white.color, fontSize: this.isMe ? 24.0 : 12.0),
     );
     this.game.add(_textObject
       ..x = pos.x
