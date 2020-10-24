@@ -5,7 +5,7 @@ import 'package:lama/pages/preparation/room/create.dart';
 import 'package:lama/pages/preparation/room/search.dart';
 
 class PreparationMainPage extends StatefulWidget {
-  final String title = 'Lama';
+  final String title = 'L.A.M.A.';
 
   @override
   State<StatefulWidget> createState() => _PreparationMainPageState();

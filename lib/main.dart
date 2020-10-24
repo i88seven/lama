@@ -27,7 +27,7 @@ class LamaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Lama',
+        title: 'L.A.M.A.',
         theme: ThemeData.dark(),
         home: Scaffold(
           body: PreparationMainPage(),
