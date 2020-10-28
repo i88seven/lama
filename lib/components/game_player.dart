@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:flame/components/text_component.dart';
 import 'package:flame/palette.dart';
 import 'package:flame/position.dart';
@@ -71,10 +73,11 @@ class GamePlayer {
         30,
       );
     }
+    Color textColor =
+        this.isPassed ? BasicPalette.black.color : BasicPalette.white.color;
     _textObject = TextComponent(
       "$name: $_points",
-      config: TextConfig(
-          color: BasicPalette.white.color, fontSize: this.isMe ? 24.0 : 12.0),
+      config: TextConfig(color: textColor, fontSize: this.isMe ? 24.0 : 12.0),
     );
     this.game.add(_textObject
       ..x = pos.x
