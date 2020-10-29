@@ -29,7 +29,7 @@ class OtherHands {
     for (int i = 0; i < numbers.length; i++) {
       Position pos = Position(
         _game.screenSize.width / (_game.playerCount - 1) * _order + i * padding,
-        80,
+        80.0 + i * (numbers.length > 8 ? 2.0 : 3.0),
       );
       BackCard cardObject = BackCard(CardState.Other);
       _game.add(cardObject
