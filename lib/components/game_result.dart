@@ -25,7 +25,7 @@ class GameResult {
       ..y = _game.screenSize.height - 110;
     _game.add(_endButton);
 
-    // TODO ポイント順に並び替えたい
+    _gamePlayers.sort((a, b) => b.points - a.points);
     _gamePlayers.asMap().forEach((index, gamePlayer) {
       GamePlayerResult gamePlayerResult = GamePlayerResult(gamePlayer)
         ..x = 30
