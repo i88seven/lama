@@ -178,6 +178,11 @@ class LamaGame extends BaseGame with TapDetector {
           ..y = this.screenSize.height - 260);
       }
       _currentOrder = e.snapshot.value;
+      _gamePlayers.forEach((gamePlayer) {
+        gamePlayer.updateTurn(
+            (gamePlayer.displayOrder + _myOrder + 1) % this.playerCount ==
+                _currentOrder);
+      });
       _hands.setActive(_currentOrder == _myOrder);
       _passButton.setDisabled(_currentOrder != _myOrder);
       return;
@@ -231,6 +236,11 @@ class LamaGame extends BaseGame with TapDetector {
 
     if (_currentOrder == null) {
       _currentOrder = 0;
+      _gamePlayers.forEach((gamePlayer) {
+        gamePlayer.updateTurn(
+            (gamePlayer.displayOrder + _myOrder + 1) % this.playerCount ==
+                _currentOrder);
+      });
       await _gameRef.child('current').set(_currentOrder);
     }
     _hands.setActive(_currentOrder == _myOrder);

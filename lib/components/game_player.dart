@@ -16,6 +16,7 @@ class GamePlayer {
   bool isPassed;
   int displayOrder; // 自分から見て次の人が "0"
   bool isMe;
+  bool _isOnesTurn = false;
   TextComponent _textObject;
 
   GamePlayer(this.game, this.uid, this.name, this.displayOrder, this.isMe) {
@@ -29,6 +30,11 @@ class GamePlayer {
     _points = points;
     this.isFinished = isFinished;
     this.isPassed = isPassed;
+    _render();
+  }
+
+  void updateTurn(bool isOnesTurn) {
+    this._isOnesTurn = isOnesTurn;
     _render();
   }
 
@@ -73,15 +79,23 @@ class GamePlayer {
         30,
       );
     }
-    Color textColor =
-        this.isPassed ? BasicPalette.black.color : BasicPalette.white.color;
     _textObject = TextComponent(
       "$name: $_points",
-      config: TextConfig(color: textColor, fontSize: this.isMe ? 24.0 : 12.0),
+      config: TextConfig(color: _textColor, fontSize: this.isMe ? 24.0 : 12.0),
     );
     this.game.add(_textObject
       ..x = pos.x
       ..y = pos.y);
+  }
+
+  Color get _textColor {
+    if (this.isPassed) {
+      return BasicPalette.black.color;
+    }
+    if (_isOnesTurn) {
+      return Colors.yellow;
+    }
+    return BasicPalette.white.color;
   }
 
   bool get isGameOver => _points >= 40;
